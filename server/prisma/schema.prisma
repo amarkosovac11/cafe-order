@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MenuCategory {
+  id    String     @id @default(cuid())
+  name  String     @unique
+  items MenuItem[]
+}
+
+model MenuItem {
+  id          String       @id @default(cuid())
+  name        String
+  price       Float
+  categoryId  String
+  category    MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  tableId   String
+  status    OrderStatus @default(UNCLAIMED)
+  createdAt DateTime    @default(now())
+
+  claimedBy String?
+  claimedAt DateTime?
+
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  itemId  String
+  name    String
+  price   Float
+  qty     Int
+  note    String?
+
+  @@index([orderId])
+}
+
+model Call {
+  id        String     @id @default(cuid())
+  tableId   String
+  type      String     @default("waiter") // waiter | bill | help
+  status    CallStatus @default(OPEN)
+  createdAt DateTime   @default(now())
+
+  handledBy String?
+  handledAt DateTime?
+}
+
+enum OrderStatus {
+  UNCLAIMED
+  CLAIMED
+}
+
+enum CallStatus {
+  OPEN
+  HANDLED
+}
