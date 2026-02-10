@@ -1,22 +1,53 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
 export default function WaiterPage() {
     const api = import.meta.env.VITE_API_URL;
     const socketRef = useRef(null);
 
-    // MVP: hardcoded waiter
-    const [waiterId] = useState("w1");
+    //SOUNDS
+    const orderSoundRef = useRef(null);
+    const callSoundRef = useRef(null);
+    const [soundEnabled, setSoundEnabled] = useState(false);
 
+    // Data
+    const [waiters, setWaiters] = useState([]);
     const [orders, setOrders] = useState([]);
     const [calls, setCalls] = useState([]);
-
     const [myOrders, setMyOrders] = useState([]);
 
+    // UI
     const [err, setErr] = useState("");
     const [loadingOrders, setLoadingOrders] = useState(true);
     const [loadingCalls, setLoadingCalls] = useState(true);
     const [loadingMyOrders, setLoadingMyOrders] = useState(true);
+
+    // ✅ Only store waiterId (string) — most reliable
+    const [selectedWaiterId, setSelectedWaiterId] = useState(() => {
+        return localStorage.getItem("selectedWaiterId") || "";
+    });
+
+    const selectedWaiter = useMemo(() => {
+        return waiters.find((w) => w.id === selectedWaiterId) || null;
+    }, [waiters, selectedWaiterId]);
+
+    const waiterId = selectedWaiter?.id || "";
+    const waiterName = selectedWaiter?.name || "";
+
+    // ---------- Loaders ----------
+    const loadWaiters = async () => {
+        const res = await fetch(`${api}/waiters`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setWaiters(data);
+
+        // auto-select first waiter only if nothing selected
+        if (!selectedWaiterId && data.length > 0) {
+            const firstId = data[0].id;
+            setSelectedWaiterId(firstId);
+            localStorage.setItem("selectedWaiterId", firstId);
+        }
+    };
 
     const loadOrders = async () => {
         try {
@@ -40,9 +71,16 @@ export default function WaiterPage() {
         }
     };
 
-    const loadMyOrders = async () => {
+    const loadMyOrders = async (wid) => {
+        // if no waiter chosen, just clear myOrders
+        if (!wid) {
+            setMyOrders([]);
+            setLoadingMyOrders(false);
+            return;
+        }
+
         try {
-            const res = await fetch(`${api}/orders/claimed/${waiterId}`);
+            const res = await fetch(`${api}/orders/claimed/${wid}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             setMyOrders(data);
@@ -51,73 +89,86 @@ export default function WaiterPage() {
         }
     };
 
+    // ---------- Mount ----------
     useEffect(() => {
         setErr("");
+
+        // initial loads
+        loadWaiters().catch((e) => setErr(e.message));
         loadOrders().catch((e) => setErr(e.message));
         loadCalls().catch(() => { });
-        loadMyOrders().catch(() => { });
+        // myOrders loads after waiter selection in the next effect
 
-        // Create ONE socket connection
+        // socket connect once
         socketRef.current = io(api, { transports: ["websocket"] });
         const socket = socketRef.current;
 
-        socket.on("connect", () => {
-            console.log("✅ waiter socket connected:", socket.id);
-        });
+        socket.on("connect", () => console.log("✅ waiter socket connected:", socket.id));
 
         // Orders realtime
         socket.on("order:new", (order) => {
-            console.log("📥 order:new", order.id);
             setOrders((prev) => [order, ...prev]);
+
+            if (soundEnabled) { orderSoundRef.current?.play().catch(() => {
+                // If browser blocks autoplay, fallback beep:
+                try { window.navigator.vibrate?.(80); } catch { }
+            });}
         });
 
         socket.on("order:claimed", ({ orderId, waiterId: claimedBy }) => {
-            console.log("📤 order:claimed", orderId, "by", claimedBy);
-
-            // remove from unclaimed list
             setOrders((prev) => prev.filter((o) => o.id !== orderId));
 
-            // if I claimed it, refresh my orders
-            if (claimedBy === waiterId) {
+            // if this dashboard's selected waiter claimed it, refresh myOrders
+            if (claimedBy === selectedWaiterId) {
                 setLoadingMyOrders(true);
-                loadMyOrders().catch(() => { });
+                loadMyOrders(claimedBy).catch(() => { });
             }
+        });
+
+        socket.on("order:deleted", ({ orderId }) => {
+            setOrders((prev) => prev.filter((o) => o.id !== orderId));
+            setMyOrders((prev) => prev.filter((o) => o.id !== orderId));
         });
 
         // Calls realtime
         socket.on("call:new", (call) => {
-            console.log("🔔 call:new", call.id);
             setCalls((prev) => [call, ...prev]);
+            if (soundEnabled) {callSoundRef.current?.play().catch(() => {
+                try { window.navigator.vibrate?.(120); } catch { }
+            });}
         });
 
         socket.on("call:handled", ({ callId }) => {
-            console.log("✅ call:handled", callId);
             setCalls((prev) => prev.filter((c) => c.id !== callId));
         });
 
-        socket.on("disconnect", () => {
-            console.log("❌ waiter socket disconnected");
-        });
-        socket.on("order:deleted", ({ orderId }) => {
-            // remove from BOTH lists
-            setOrders((prev) => prev.filter((o) => o.id !== orderId));
-            setMyOrders((prev) => prev.filter((o) => o.id !== orderId));
-        });
+        socket.on("disconnect", () => console.log("❌ waiter socket disconnected"));
 
         return () => {
             socket.off("connect");
             socket.off("order:new");
             socket.off("order:claimed");
+            socket.off("order:deleted");
             socket.off("call:new");
             socket.off("call:handled");
             socket.off("disconnect");
-            socket.off("order:deleted");
             socket.disconnect();
         };
-    }, [api, waiterId]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [api]);
 
+    // ---------- When waiter changes, reload my orders ----------
+    useEffect(() => {
+        setLoadingMyOrders(true);
+        loadMyOrders(selectedWaiterId).catch(() => { });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedWaiterId]);
+
+    // ---------- Actions ----------
     const claimOrder = async (orderId) => {
         setErr("");
+        if (!waiterId) return setErr("Select waiter first.");
+
         try {
             const res = await fetch(`${api}/orders/${orderId}/claim`, {
                 method: "PATCH",
@@ -128,9 +179,8 @@ export default function WaiterPage() {
             const text = await res.text();
             if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-            // Refresh my orders AFTER successful claim
             setLoadingMyOrders(true);
-            loadMyOrders().catch(() => { });
+            await loadMyOrders(waiterId);
         } catch (e) {
             setErr(e.message);
         }
@@ -138,6 +188,8 @@ export default function WaiterPage() {
 
     const handleCall = async (callId) => {
         setErr("");
+        if (!waiterId) return setErr("Select waiter first.");
+
         try {
             const res = await fetch(`${api}/calls/${callId}/handle`, {
                 method: "PATCH",
@@ -147,7 +199,6 @@ export default function WaiterPage() {
 
             const text = await res.text();
             if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-            // socket event removes it
         } catch (e) {
             setErr(e.message);
         }
@@ -156,28 +207,75 @@ export default function WaiterPage() {
     const finishOrder = async (orderId) => {
         setErr("");
         try {
-            const res = await fetch(`${api}/orders/${orderId}`, {
-                method: "DELETE",
-            });
-
+            const res = await fetch(`${api}/orders/${orderId}`, { method: "DELETE" });
             const text = await res.text();
             if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-
-            // socket will remove it from UI
         } catch (e) {
             setErr(e.message);
         }
     };
 
-
+    // ---------- UI ----------
     return (
         <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Arial" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h1 style={{ margin: 0 }}>Waiter Dashboard</h1>
-                <div style={{ opacity: 0.7 }}>
-                    Waiter: <b>{waiterId}</b>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                <h1 style={{ margin: 0 }}>Waiter Dashboard<button
+                    onClick={() => {
+                        setSoundEnabled(true);
+                        // warm-up play (muted-ish)
+                        orderSoundRef.current?.play().then(() => {
+                            orderSoundRef.current.pause();
+                            orderSoundRef.current.currentTime = 0;
+                        }).catch(() => { });
+                    }}
+                    style={{ padding: "8px 12px", fontWeight: 700 }}
+                >
+                    {soundEnabled ? "Sound ✅" : "Enable Sound"}
+                </button>
+                </h1>
+
+
+                <audio ref={orderSoundRef} src="/sounds/new-order.mp3" preload="auto" />
+                <audio ref={callSoundRef} src="/sounds/new-call.mp3" preload="auto" />
+
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ opacity: 0.7 }}>Waiter:</span>
+                    <select
+                        value={selectedWaiterId}
+                        onChange={(e) => {
+                            const id = e.target.value;
+                            setSelectedWaiterId(id);
+                            localStorage.setItem("selectedWaiterId", id);
+                        }}
+                        style={{ padding: 8, fontWeight: 700 }}
+                    >
+                        <option value="" disabled>
+                            Select waiter
+                        </option>
+                        {waiters.map((w) => (
+                            <option key={w.id} value={w.id}>
+                                {w.name}
+                            </option>
+                        ))}
+                    </select>
+                    {waiterName ? <span style={{ opacity: 0.7 }}>{waiterName}</span> : null}
                 </div>
             </div>
+
+            {!waiterId && (
+                <div
+                    style={{
+                        marginTop: 12,
+                        padding: 12,
+                        background: "#fff3cd",
+                        border: "1px solid #ffeeba",
+                        borderRadius: 8,
+                    }}
+                >
+                    Please select a waiter to use the dashboard.
+                </div>
+            )}
 
             {err && <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {err}</p>}
 
@@ -191,23 +289,15 @@ export default function WaiterPage() {
                 <div style={{ display: "grid", gap: 10, marginBottom: 16 }}>
                     {calls.map((c) => (
                         <div key={c.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    gap: 12,
-                                }}
-                            >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                                 <div>
                                     <b>Table {c.tableId}</b> — {c.type}
-                                    <div style={{ fontSize: 12, opacity: 0.7 }}>
-                                        {new Date(c.createdAt).toLocaleString()}
-                                    </div>
+                                    <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(c.createdAt).toLocaleString()}</div>
                                 </div>
                                 <button
                                     onClick={() => handleCall(c.id)}
                                     style={{ padding: "10px 14px", fontWeight: 700 }}
+                                    disabled={!waiterId}
                                 >
                                     Handled
                                 </button>
@@ -234,15 +324,14 @@ export default function WaiterPage() {
                             <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                                 <div>
                                     <div style={{ fontWeight: 800 }}>Table {o.tableId}</div>
-                                    <div style={{ fontSize: 12, opacity: 0.7 }}>
-                                        {new Date(o.createdAt).toLocaleString()}
-                                    </div>
+                                    <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(o.createdAt).toLocaleString()}</div>
                                     <div style={{ fontSize: 12, opacity: 0.7 }}>Order ID: {o.id}</div>
                                 </div>
 
                                 <button
                                     onClick={() => claimOrder(o.id)}
                                     style={{ padding: "10px 14px", fontWeight: 700 }}
+                                    disabled={!waiterId}
                                 >
                                     Claim
                                 </button>
@@ -250,15 +339,10 @@ export default function WaiterPage() {
 
                             <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
                                 {o.items.map((it) => (
-                                    <div
-                                        key={it.itemId}
-                                        style={{ display: "flex", justifyContent: "space-between", gap: 12 }}
-                                    >
+                                    <div key={it.itemId} style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                                         <div>
                                             <b>{it.name}</b> × {it.qty}
-                                            {it.note ? (
-                                                <div style={{ fontSize: 12, opacity: 0.8 }}>Note: {it.note}</div>
-                                            ) : null}
+                                            {it.note ? <div style={{ fontSize: 12, opacity: 0.8 }}>Note: {it.note}</div> : null}
                                         </div>
                                         <div>{(it.price * it.qty).toFixed(2)} KM</div>
                                     </div>
@@ -283,10 +367,11 @@ export default function WaiterPage() {
                                 <div>
                                     <div style={{ fontWeight: 800 }}>Table {o.tableId}</div>
                                     <div style={{ fontSize: 12, opacity: 0.7 }}>
-                                        Claimed at {new Date(o.claimedAt).toLocaleString()}
+                                        Claimed at {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
                                     </div>
                                     <div style={{ fontSize: 12, opacity: 0.7 }}>Order ID: {o.id}</div>
                                 </div>
+
                                 <button
                                     onClick={() => finishOrder(o.id)}
                                     style={{
@@ -301,20 +386,14 @@ export default function WaiterPage() {
                                 >
                                     Done
                                 </button>
-
                             </div>
 
                             <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
                                 {o.items.map((it) => (
-                                    <div
-                                        key={it.itemId}
-                                        style={{ display: "flex", justifyContent: "space-between", gap: 12 }}
-                                    >
+                                    <div key={it.itemId} style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                                         <div>
                                             <b>{it.name}</b> × {it.qty}
-                                            {it.note ? (
-                                                <div style={{ fontSize: 12, opacity: 0.8 }}>Note: {it.note}</div>
-                                            ) : null}
+                                            {it.note ? <div style={{ fontSize: 12, opacity: 0.8 }}>Note: {it.note}</div> : null}
                                         </div>
                                         <div>{(it.price * it.qty).toFixed(2)} KM</div>
                                     </div>

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+
 
 export default function TablePage() {
     const { tableId } = useParams();
@@ -15,6 +17,9 @@ export default function TablePage() {
     const [placedMsg, setPlacedMsg] = useState("");
     const [callMsg, setCallMsg] = useState("");
 
+    // Token (optional for now)
+    const [searchParams] = useSearchParams();
+    const token = searchParams.get("token") || "";
 
     useEffect(() => {
         fetch(`${api}/menu`)
@@ -62,11 +67,13 @@ export default function TablePage() {
         setCart((prev) => {
             const existing = prev[itemId];
             if (!existing) return prev;
+
             if (existing.qty <= 1) {
                 const copy = { ...prev };
                 delete copy[itemId];
                 return copy;
             }
+
             return { ...prev, [itemId]: { ...existing, qty: existing.qty - 1 } };
         });
     };
@@ -82,27 +89,36 @@ export default function TablePage() {
     const placeOrder = async () => {
         setErr("");
         setPlacedMsg("");
+        setCallMsg("");
 
         if (cartItems.length === 0) {
             setErr("Cart is empty.");
             return;
         }
 
+        // ✅ Build payloadItems correctly
+        const payloadItems = cartItems.map((it) => ({
+            itemId: it.itemId,
+            name: it.name,
+            price: it.price,
+            qty: it.qty,
+            note: it.note || "",
+        }));
+
         setPlacing(true);
         try {
+            const body = { tableId, items: payloadItems };
+            if (token) body.token = token; // optional (for later security)
+
             const res = await fetch(`${api}/orders`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    tableId,
-                    items: cartItems,
-                }),
+                body: JSON.stringify(body),
             });
 
             const text = await res.text();
             if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-            // success
             setCart({});
             setPlacedMsg("✅ Order sent! Waiter will see it now.");
         } catch (e) {
@@ -115,11 +131,16 @@ export default function TablePage() {
     const callWaiter = async () => {
         setErr("");
         setCallMsg("");
+        setPlacedMsg("");
+
         try {
+            const body = { tableId, type: "waiter" };
+            if (token) body.token = token; // optional (for later security)
+
             const res = await fetch(`${api}/calls`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tableId, type: "waiter" }),
+                body: JSON.stringify(body),
             });
 
             const text = await res.text();
@@ -130,6 +151,9 @@ export default function TablePage() {
             setErr(e.message);
         }
     };
+
+
+
 
 
     return (

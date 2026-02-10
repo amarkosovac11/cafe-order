@@ -11,6 +11,22 @@ const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
 
+async function requireValidTable(req, res, next) {
+  const tableId = String(req.body.tableId || req.params.tableId || "");
+  const token = String(req.body.token || req.query.token || "");
+
+  if (!tableId) return res.status(400).json({ error: "tableId is required" });
+  if (!token) return res.status(401).json({ error: "token is required" });
+
+  const table = await prisma.table.findUnique({ where: { id: tableId } });
+  if (!table || !table.isActive) return res.status(404).json({ error: "table not found" });
+  if (table.token !== token) return res.status(403).json({ error: "invalid token" });
+
+  req.table = table;
+  next();
+}
+
+
 // --- Create HTTP server + Socket.IO FIRST (so io exists for routes) ---
 const PORT = process.env.PORT || 4000;
 const server = http.createServer(app);
@@ -40,13 +56,12 @@ app.get("/menu", (req, res) => {
 });
 
 // Create order (in-memory for now)
-app.post("/orders", async (req, res) => {
+app.post("/orders", requireValidTable, async (req, res) => {
   const { tableId, items } = req.body;
 
-  if (!tableId) return res.status(400).json({ error: "tableId is required" });
-  if (!Array.isArray(items) || items.length === 0) {
+/*   if (!tableId) return res.status(400).json({ error: "tableId is required" });
+ */  if (!Array.isArray(items) || items.length === 0)
     return res.status(400).json({ error: "items must be a non-empty array" });
-  }
 
   const order = await prisma.order.create({
     data: {
@@ -145,21 +160,32 @@ app.delete("/orders/:orderId", async (req, res) => {
 
 
 // CALLS (Prisma)
-app.post("/calls", async (req, res) => {
-    const { tableId, type } = req.body;
-    if (!tableId) return res.status(400).json({ error: "tableId is required" });
+app.post("/calls", requireValidTable, async (req, res) => {
+  const { tableId, type } = req.body;
 
-    const call = await prisma.call.create({
-        data: {
-            tableId: String(tableId),
-            type: type || "waiter",
-            status: "OPEN",
-        },
-    });
+  const call = await prisma.call.create({
+    data: {
+      tableId: String(tableId),
+      type: type || "waiter",
+      status: "OPEN",
+    },
+  });
 
-    io.emit("call:new", call);
-    res.status(201).json(call);
+  io.emit("call:new", call);
+  res.status(201).json(call);
 });
+
+app.get("/tables/:tableId", async (req, res) => {
+  const { tableId } = req.params;
+  const token = String(req.query.token || "");
+
+  const table = await prisma.table.findUnique({ where: { id: String(tableId) } });
+  if (!table || !table.isActive) return res.status(404).json({ error: "table not found" });
+  if (!token || table.token !== token) return res.status(403).json({ error: "invalid token" });
+
+  res.json({ id: table.id, name: table.name });
+});
+
 
 app.get("/calls/open", async (req, res) => {
     const data = await prisma.call.findMany({
@@ -187,6 +213,27 @@ app.patch("/calls/:callId/handle", async (req, res) => {
     io.emit("call:handled", { callId: updated.id, waiterId });
     res.json(updated);
 });
+
+/* app.post("/waiters/login", async (req, res) => {
+  const { pin } = req.body;
+  if (!pin) return res.status(400).json({ error: "pin is required" });
+
+  const waiter = await prisma.waiter.findUnique({ where: { pin: String(pin) } });
+  if (!waiter || !waiter.isActive) return res.status(401).json({ error: "invalid pin" });
+
+  res.json({ id: waiter.id, name: waiter.name });
+}); */
+
+app.get("/waiters", async (req, res) => {
+  const waiters = await prisma.waiter.findMany({
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+
+  res.json(waiters);
+});
+
 
 // Start server
 server.listen(PORT, () => {

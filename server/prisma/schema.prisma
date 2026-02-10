@@ -61,6 +61,24 @@ model Call {
   handledAt DateTime?
 }
 
+model Table {
+  id        String   @id // "7", "12" etc.
+  name      String?
+  token     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+
+model Waiter {
+  id        String   @id @default(cuid())
+  name      String
+  pin       String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+
 enum OrderStatus {
   UNCLAIMED
   CLAIMED
