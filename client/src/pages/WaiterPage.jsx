@@ -34,6 +34,24 @@ export default function WaiterPage() {
     const waiterId = selectedWaiter?.id || "";
     const waiterName = selectedWaiter?.name || "";
 
+
+    const enableSound = async () => {
+        try {
+            const a = orderSoundRef.current;
+            if (!a) return;
+
+            // unlock autoplay on user gesture
+            await a.play();
+            a.pause();
+            a.currentTime = 0;
+
+            setSoundEnabled(true);
+        } catch (e) {
+            console.log("Enable sound failed:", e);
+        }
+    };
+
+
     // ---------- Loaders ----------
     const loadWaiters = async () => {
         const res = await fetch(`${api}/waiters`);
@@ -106,7 +124,7 @@ export default function WaiterPage() {
         socket.on("connect", () => console.log("✅ waiter socket connected:", socket.id));
 
         // Orders realtime
-        socket.on("order:new", (order) => {
+        /* socket.on("order:new", (order) => {
             setOrders((prev) => [order, ...prev]);
 
             if (soundEnabled) { orderSoundRef.current?.play().catch(() => {
@@ -114,8 +132,32 @@ export default function WaiterPage() {
                 try { window.navigator.vibrate?.(80); } catch { }
             });}
         });
+ */
 
-        socket.on("order:claimed", ({ orderId, waiterId: claimedBy }) => {
+        // SOCKET ON FOR SOUNDS TESTINGGGG
+        socket.on("order:new", (order) => {
+            setOrders((prev) => [order, ...prev]);
+
+            if (!soundEnabled) return;
+
+            const a = orderSoundRef.current;
+            if (!a) return;
+
+            // restart sound if another order comes quickly
+            try {
+                a.currentTime = 0;
+            } catch { }
+
+            a.play().catch((err) => {
+                console.log("Sound blocked:", err);
+                try { window.navigator.vibrate?.(80); } catch { }
+            });
+        });
+
+
+
+
+        /* socket.on("order:claimed", ({ orderId, waiterId: claimedBy }) => {
             setOrders((prev) => prev.filter((o) => o.id !== orderId));
 
             // if this dashboard's selected waiter claimed it, refresh myOrders
@@ -123,7 +165,15 @@ export default function WaiterPage() {
                 setLoadingMyOrders(true);
                 loadMyOrders(claimedBy).catch(() => { });
             }
-        });
+        }); */
+
+        socket.on("order:new", (order) => {
+  console.log("🔥 order:new received", order?.id, "soundEnabled=", soundEnabled);
+  setOrders((prev) => [order, ...prev]);
+
+  // play no matter what (TEMP TEST)
+  orderSoundRef.current?.play().catch(console.log);
+});
 
         socket.on("order:deleted", ({ orderId }) => {
             setOrders((prev) => prev.filter((o) => o.id !== orderId));
@@ -133,9 +183,11 @@ export default function WaiterPage() {
         // Calls realtime
         socket.on("call:new", (call) => {
             setCalls((prev) => [call, ...prev]);
-            if (soundEnabled) {callSoundRef.current?.play().catch(() => {
-                try { window.navigator.vibrate?.(120); } catch { }
-            });}
+            if (soundEnabled) {
+                callSoundRef.current?.play().catch(() => {
+                    try { window.navigator.vibrate?.(120); } catch { }
+                });
+            }
         });
 
         socket.on("call:handled", ({ callId }) => {
@@ -219,7 +271,8 @@ export default function WaiterPage() {
     return (
         <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Arial" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                <h1 style={{ margin: 0 }}>Waiter Dashboard<button
+                <h1 style={{ margin: 0 }}>Waiter Dashboard
+                    {/* <button
                     onClick={() => {
                         setSoundEnabled(true);
                         // warm-up play (muted-ish)
@@ -231,7 +284,16 @@ export default function WaiterPage() {
                     style={{ padding: "8px 12px", fontWeight: 700 }}
                 >
                     {soundEnabled ? "Sound ✅" : "Enable Sound"}
-                </button>
+                </button> */}
+
+                    <button onClick={() => orderSoundRef.current?.play().catch(console.log)}>
+                        Test sound
+                    </button>
+
+                    <button onClick={enableSound}>
+                        {soundEnabled ? "Sound ✅" : "Enable Sound"}
+                    </button>
+
                 </h1>
 
 
@@ -291,7 +353,7 @@ export default function WaiterPage() {
                         <div key={c.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                                 <div>
-                                    <b>Table {c.tableId}</b> — {c.type}
+                                    <b>Table {c.tableId}</b> — {c.type === "bill" ? "💰 Bill" : "👋 Waiter"}
                                     <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(c.createdAt).toLocaleString()}</div>
                                 </div>
                                 <button

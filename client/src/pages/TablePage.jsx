@@ -152,6 +152,28 @@ export default function TablePage() {
         }
     };
 
+    const requestBill = async () => {
+  setErr("");
+  setCallMsg("");
+  try {
+    const body = { tableId, type: "bill" };
+    if (token) body.token = token;
+
+    const res = await fetch(`${api}/calls`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const text = await res.text();
+    if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+
+    setCallMsg("✅ Bill requested.");
+  } catch (e) {
+    setErr(e.message);
+  }
+};
+
 
 
 
@@ -172,6 +194,15 @@ export default function TablePage() {
             >
                 Call waiter
             </button>
+
+            <button
+                onClick={requestBill}
+                style={{ padding: "10px 12px", fontWeight: 700, marginBottom: 16 }}
+            >
+                Request Bill
+            </button>
+
+            
 
 
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
