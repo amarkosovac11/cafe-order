@@ -14,70 +14,67 @@ model MenuCategory {
 }
 
 model MenuItem {
-  id          String       @id @default(cuid())
-  name        String
-  price       Float
-  categoryId  String
-  category    MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  name       String
+  price      Float
+  categoryId String
+  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
 }
 
 model Order {
-  id        String      @id @default(cuid())
-  tableId   String
-  status    OrderStatus @default(UNCLAIMED)
-  createdAt DateTime    @default(now())
-
-  claimedBy String?
-  claimedAt DateTime?
-
-  items     OrderItem[]
+  id          String      @id @default(cuid())
+  tableId     String
+  status      OrderStatus @default(UNCLAIMED)
+  createdAt   DateTime    @default(now())
+  claimedAt   DateTime?
+  claimedById Int?
+  claimedBy   Waiter?     @relation("OrderClaimedBy", fields: [claimedById], references: [id])
+  items       OrderItem[]
 }
 
 model OrderItem {
-  id      String @id @default(cuid())
-
+  id      String  @id @default(cuid())
   orderId String
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
   itemId  String
   name    String
   price   Float
   qty     Int
   note    String?
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
 }
 
 model Call {
-  id        String     @id @default(cuid())
-  tableId   String
-  type      String     @default("waiter") // waiter | bill | help
-  status    CallStatus @default(OPEN)
-  createdAt DateTime   @default(now())
-
-  handledBy String?
-  handledAt DateTime?
+  id          String     @id @default(cuid())
+  tableId     String
+  type        String     @default("waiter")
+  status      CallStatus @default(OPEN)
+  createdAt   DateTime   @default(now())
+  handledAt   DateTime?
+  handledById Int?
+  handledBy   Waiter?    @relation("CallHandledBy", fields: [handledById], references: [id])
 }
 
 model Table {
-  id        String   @id // "7", "12" etc.
+  id        String   @id
   name      String?
   token     String   @unique
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
-
 model Waiter {
-  id        String   @id @default(cuid())
-  name      String
-  pin       String   @unique
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  name          String
+  pin           String   @unique
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  handledCalls  Call[]   @relation("CallHandledBy")
+  claimedOrders Order[]  @relation("OrderClaimedBy")
 }
-
 
 enum OrderStatus {
   UNCLAIMED

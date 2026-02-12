@@ -116,7 +116,7 @@ app.patch("/orders/:orderId/claim", async (req, res) => {
     where: { id: orderId },
     data: {
       status: "CLAIMED",
-      claimedBy: String(waiterId),
+      claimedBy: Number(waiterId),
       claimedAt: new Date(),
     },
     include: { items: true },
@@ -133,7 +133,7 @@ app.get("/orders/claimed/:waiterId", async (req, res) => {
   const { waiterId } = req.params;
 
   const data = await prisma.order.findMany({
-    where: { status: "CLAIMED", claimedBy: String(waiterId) },
+    where: { status: "CLAIMED", claimedBy: Number(waiterId) },
     orderBy: { claimedAt: "desc" },
     include: { items: true },
   });
@@ -207,22 +207,29 @@ app.patch("/calls/:callId/handle", async (req, res) => {
 
     const updated = await prisma.call.update({
         where: { id: callId },
-        data: { status: "HANDLED", handledBy: waiterId, handledAt: new Date() },
+        data: { status: "HANDLED", handledBy: Number(waiterId), handledAt: new Date() },
     });
 
     io.emit("call:handled", { callId: updated.id, waiterId });
     res.json(updated);
 });
 
-/* app.post("/waiters/login", async (req, res) => {
+app.post("/waiters/login", async (req, res) => {
   const { pin } = req.body;
   if (!pin) return res.status(400).json({ error: "pin is required" });
 
-  const waiter = await prisma.waiter.findUnique({ where: { pin: String(pin) } });
-  if (!waiter || !waiter.isActive) return res.status(401).json({ error: "invalid pin" });
+  const waiter = await prisma.waiter.findUnique({
+    where: { pin: String(pin) },
+    select: { id: true, name: true, isActive: true },
+  });
+
+  if (!waiter || !waiter.isActive) {
+    return res.status(401).json({ error: "invalid pin" });
+  }
 
   res.json({ id: waiter.id, name: waiter.name });
-}); */
+});
+
 
 app.get("/waiters", async (req, res) => {
   const waiters = await prisma.waiter.findMany({
@@ -233,6 +240,20 @@ app.get("/waiters", async (req, res) => {
 
   res.json(waiters);
 });
+
+app.get("/waiters/:waiterId", async (req, res) => {
+  const id = Number(req.params.waiterId);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "invalid waiter id" });
+
+  const w = await prisma.waiter.findUnique({
+    where: { id },
+    select: { id: true, name: true, isActive: true, createdAt: true },
+  });
+
+  if (!w) return res.status(404).json({ error: "waiter not found" });
+  res.json(w);
+});
+
 
 
 // Start server

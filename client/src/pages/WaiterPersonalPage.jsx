@@ -1,71 +1,38 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { useParams, Link } from "react-router-dom";
 
-export default function WaiterPage() {
+export default function WaiterPersonalPage() {
     const api = import.meta.env.VITE_API_URL;
     const socketRef = useRef(null);
 
-    //SOUNDS
-    const orderSoundRef = useRef(null);
-    const callSoundRef = useRef(null);
-    const [soundEnabled, setSoundEnabled] = useState(false);
+    const { waiterId } = useParams();
 
-    // Data
-    const [waiters, setWaiters] = useState([]);
     const [orders, setOrders] = useState([]);
     const [calls, setCalls] = useState([]);
     const [myOrders, setMyOrders] = useState([]);
 
-    // UI
     const [err, setErr] = useState("");
     const [loadingOrders, setLoadingOrders] = useState(true);
     const [loadingCalls, setLoadingCalls] = useState(true);
     const [loadingMyOrders, setLoadingMyOrders] = useState(true);
 
-    // ✅ Only store waiterId (string) — most reliable
-    const [selectedWaiterId, setSelectedWaiterId] = useState(() => {
-        return localStorage.getItem("selectedWaiterId") || "";
-    });
+    const [waiterInfo, setWaiterInfo] = useState(null);
+    const [loadingWaiter, setLoadingWaiter] = useState(true);
 
-    const selectedWaiter = useMemo(() => {
-        return waiters.find((w) => String(w.id) === String(selectedWaiterId)) || null;
-    }, [waiters, selectedWaiterId]);
-
-    const waiterId = selectedWaiter?.id || "";
-    const waiterName = selectedWaiter?.name || "";
-
-
-    const enableSound = async () => {
+    const loadWaiter = async () => {
+        setLoadingWaiter(true);
         try {
-            const a = orderSoundRef.current;
-            if (!a) return;
-
-            // unlock autoplay on user gesture
-            await a.play();
-            a.pause();
-            a.currentTime = 0;
-
-            setSoundEnabled(true);
-        } catch (e) {
-            console.log("Enable sound failed:", e);
+            const res = await fetch(`${api}/waiters/${waiterId}`);
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+            const data = JSON.parse(text);
+            setWaiterInfo(data);
+        } finally {
+            setLoadingWaiter(false); // ✅ always stops loading
         }
     };
 
-
-    // ---------- Loaders ----------
-    const loadWaiters = async () => {
-        const res = await fetch(`${api}/waiters`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setWaiters(data);
-
-        // auto-select first waiter only if nothing selected
-        if (!selectedWaiterId && data.length > 0) {
-            const firstId = String(data[0].id);
-            setSelectedWaiterId(firstId);
-            localStorage.setItem("selectedWaiterId", firstId);
-        }
-    };
 
     const loadOrders = async () => {
         try {
@@ -89,16 +56,15 @@ export default function WaiterPage() {
         }
     };
 
-    const loadMyOrders = async (wid) => {
-        // if no waiter chosen, just clear myOrders
-        if (!wid) {
+    const loadMyOrders = async () => {
+        if (!waiterId) {
             setMyOrders([]);
             setLoadingMyOrders(false);
             return;
         }
 
         try {
-            const res = await fetch(`${api}/orders/claimed/${wid}`);
+            const res = await fetch(`${api}/orders/claimed/${waiterId}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             setMyOrders(data);
@@ -107,92 +73,55 @@ export default function WaiterPage() {
         }
     };
 
-    // ---------- Mount ----------
     useEffect(() => {
         setErr("");
 
-        // initial loads
-        loadWaiters().catch((e) => setErr(e.message));
+        setLoadingOrders(true);
+        setLoadingCalls(true);
+        setLoadingMyOrders(true);
+
         loadOrders().catch((e) => setErr(e.message));
         loadCalls().catch(() => { });
-        // myOrders loads after waiter selection in the next effect
+        loadMyOrders().catch(() => { });
+        loadWaiter().catch((e) => setErr(e.message));
 
-        // socket connect once
         socketRef.current = io(api, { transports: ["websocket"] });
         const socket = socketRef.current;
 
-        socket.on("connect", () => console.log("✅ waiter socket connected:", socket.id));
-
-        // Orders realtime
-        /* socket.on("order:new", (order) => {
-            setOrders((prev) => [order, ...prev]);
-
-            if (soundEnabled) { orderSoundRef.current?.play().catch(() => {
-                // If browser blocks autoplay, fallback beep:
-                try { window.navigator.vibrate?.(80); } catch { }
-            });}
+        socket.on("connect", () => {
+            console.log("✅ personal waiter socket connected:", socket.id, "waiterId:", waiterId);
         });
- */
 
-        // SOCKET ON FOR SOUNDS TESTINGGGG
         socket.on("order:new", (order) => {
-            setOrders((prev) => {
-                // prevent duplicates if event arrives twice for any reason
-                if (prev.some((o) => o.id === order.id)) return prev;
-                return [order, ...prev];
-            });
-
-            if (!soundEnabled) return;
-            const a = orderSoundRef.current;
-            if (!a) return;
-
-            try { a.currentTime = 0; } catch { }
-            a.play().catch(() => {
-                try { window.navigator.vibrate?.(80); } catch { }
-            });
+            setOrders((prev) => [order, ...prev]);
         });
-
-
-
 
         socket.on("order:claimed", ({ orderId, waiterId: claimedBy }) => {
             setOrders((prev) => prev.filter((o) => o.id !== orderId));
 
-            // if this dashboard's selected waiter claimed it, refresh myOrders
-            if (claimedBy === selectedWaiterId) {
+            // if I claimed it, refresh my orders
+            if (String(claimedBy) === String(waiterId)) {
                 setLoadingMyOrders(true);
-                loadMyOrders(claimedBy).catch(() => { });
+                loadMyOrders().catch(() => { });
             }
         });
-
-        /*  socket.on("order:new", (order) => {
-   console.log("🔥 order:new received", order?.id, "soundEnabled=", soundEnabled);
-   setOrders((prev) => [order, ...prev]); */
-
-        // play no matter what (TEMP TEST)
-        /*  orderSoundRef.current?.play().catch(console.log);
-       }); */
 
         socket.on("order:deleted", ({ orderId }) => {
             setOrders((prev) => prev.filter((o) => o.id !== orderId));
             setMyOrders((prev) => prev.filter((o) => o.id !== orderId));
         });
 
-        // Calls realtime
         socket.on("call:new", (call) => {
             setCalls((prev) => [call, ...prev]);
-            if (soundEnabled) {
-                callSoundRef.current?.play().catch(() => {
-                    try { window.navigator.vibrate?.(120); } catch { }
-                });
-            }
         });
 
         socket.on("call:handled", ({ callId }) => {
             setCalls((prev) => prev.filter((c) => c.id !== callId));
         });
 
-        socket.on("disconnect", () => console.log("❌ waiter socket disconnected"));
+        socket.on("disconnect", () => {
+            console.log("❌ personal waiter socket disconnected");
+        });
 
         return () => {
             socket.off("connect");
@@ -205,19 +134,11 @@ export default function WaiterPage() {
             socket.disconnect();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [api]);
+    }, [api, waiterId]);
 
-    // ---------- When waiter changes, reload my orders ----------
-    useEffect(() => {
-        setLoadingMyOrders(true);
-        loadMyOrders(selectedWaiterId).catch(() => { });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedWaiterId]);
-
-    // ---------- Actions ----------
     const claimOrder = async (orderId) => {
         setErr("");
-        if (!waiterId) return setErr("Select waiter first.");
+        if (!waiterId) return setErr("Missing waiterId in URL.");
 
         try {
             const res = await fetch(`${api}/orders/${orderId}/claim`, {
@@ -230,7 +151,7 @@ export default function WaiterPage() {
             if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
             setLoadingMyOrders(true);
-            await loadMyOrders(waiterId);
+            loadMyOrders().catch(() => { });
         } catch (e) {
             setErr(e.message);
         }
@@ -238,7 +159,7 @@ export default function WaiterPage() {
 
     const handleCall = async (callId) => {
         setErr("");
-        if (!waiterId) return setErr("Select waiter first.");
+        if (!waiterId) return setErr("Missing waiterId in URL.");
 
         try {
             const res = await fetch(`${api}/calls/${callId}/handle`, {
@@ -265,77 +186,39 @@ export default function WaiterPage() {
         }
     };
 
-    // ---------- UI ----------
+    // ✅ render guards (must be BEFORE return JSX)
+    if (loadingWaiter) {
+        return <div style={{ padding: 24, fontFamily: "Arial" }}>Loading waiter…</div>;
+    }
+
+    if (!waiterInfo || waiterInfo.isActive === false) {
+        return (
+            <div style={{ padding: 24, fontFamily: "Arial" }}>
+                <h2>Waiter not found</h2>
+                <p>This waiter ID is invalid.</p>
+            </div>
+        );
+    }
+
+
     return (
         <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Arial" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                <h1 style={{ margin: 0 }}>Waiter Dashboard
-                    {/* <button
-                    onClick={() => {
-                        setSoundEnabled(true);
-                        // warm-up play (muted-ish)
-                        orderSoundRef.current?.play().then(() => {
-                            orderSoundRef.current.pause();
-                            orderSoundRef.current.currentTime = 0;
-                        }).catch(() => { });
-                    }}
-                    style={{ padding: "8px 12px", fontWeight: 700 }}
-                >
-                    {soundEnabled ? "Sound ✅" : "Enable Sound"}
-                </button> */}
-
-                    <button onClick={() => orderSoundRef.current?.play().catch(console.log)}>
-                        Test sound
-                    </button>
-
-                    <button onClick={enableSound}>
-                        {soundEnabled ? "Sound ✅" : "Enable Sound"}
-                    </button>
-
-                </h1>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                <div>
+                    <h1 style={{ margin: 0 }}>Waiter</h1>
+                    <div style={{ opacity: 0.7, marginTop: 6 }}>
+                        Personal page for waiterId: <b>{waiterId}</b>
+                    </div>
+                </div>
 
 
-                <audio ref={orderSoundRef} src="/sounds/new-order.mp3" preload="auto" />
-                <audio ref={callSoundRef} src="/sounds/new-call.mp3" preload="auto" />
 
-
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ opacity: 0.7 }}>Waiter:</span>
-                    <select
-                        value={selectedWaiterId}
-                        onChange={(e) => {
-                            const id = String(e.target.value);
-                            setSelectedWaiterId(id);
-                            localStorage.setItem("selectedWaiterId", id);
-                        }}
-                        style={{ padding: 8, fontWeight: 700 }}
-                    >
-                        <option value="" disabled>
-                            Select waiter
-                        </option>
-                        {waiters.map((w) => (
-                            <option key={w.id} value={w.id}>
-                                {w.name}
-                            </option>
-                        ))}
-                    </select>
-                    {waiterName ? <span style={{ opacity: 0.7 }}>{waiterName}</span> : null}
+                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <Link to="/waiter" style={{ opacity: 0.8 }}>
+                        Shared dashboard
+                    </Link>
                 </div>
             </div>
-
-            {!waiterId && (
-                <div
-                    style={{
-                        marginTop: 12,
-                        padding: 12,
-                        background: "#fff3cd",
-                        border: "1px solid #ffeeba",
-                        borderRadius: 8,
-                    }}
-                >
-                    Please select a waiter to use the dashboard.
-                </div>
-            )}
 
             {err && <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {err}</p>}
 
@@ -354,11 +237,7 @@ export default function WaiterPage() {
                                     <b>Table {c.tableId}</b> — {c.type === "bill" ? "💰 Bill" : "👋 Waiter"}
                                     <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(c.createdAt).toLocaleString()}</div>
                                 </div>
-                                <button
-                                    onClick={() => handleCall(c.id)}
-                                    style={{ padding: "10px 14px", fontWeight: 700 }}
-                                    disabled={!waiterId}
-                                >
+                                <button onClick={() => handleCall(c.id)} style={{ padding: "10px 14px", fontWeight: 700 }}>
                                     Handled
                                 </button>
                             </div>
@@ -367,11 +246,9 @@ export default function WaiterPage() {
                 </div>
             )}
 
-            {/* UNCLAIMED ORDERS */}
+            {/* UNCLAIMED */}
             <h2 style={{ marginTop: 18 }}>Unclaimed Orders</h2>
-            <p style={{ opacity: 0.7 }}>
-                New orders appear here. Click <b>Claim</b> to take responsibility.
-            </p>
+            <p style={{ opacity: 0.7 }}>Everyone sees these. Click <b>Claim</b> to take it.</p>
 
             {loadingOrders ? (
                 <p>Loading orders…</p>
@@ -387,12 +264,7 @@ export default function WaiterPage() {
                                     <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(o.createdAt).toLocaleString()}</div>
                                     <div style={{ fontSize: 12, opacity: 0.7 }}>Order ID: {o.id}</div>
                                 </div>
-
-                                <button
-                                    onClick={() => claimOrder(o.id)}
-                                    style={{ padding: "10px 14px", fontWeight: 700 }}
-                                    disabled={!waiterId}
-                                >
+                                <button onClick={() => claimOrder(o.id)} style={{ padding: "10px 14px", fontWeight: 700 }}>
                                     Claim
                                 </button>
                             </div>
@@ -431,7 +303,6 @@ export default function WaiterPage() {
                                     </div>
                                     <div style={{ fontSize: 12, opacity: 0.7 }}>Order ID: {o.id}</div>
                                 </div>
-
                                 <button
                                     onClick={() => finishOrder(o.id)}
                                     style={{
