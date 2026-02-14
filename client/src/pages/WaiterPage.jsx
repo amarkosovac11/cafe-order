@@ -1,14 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 
 export default function WaiterPage() {
     const api = import.meta.env.VITE_API_URL;
     const socketRef = useRef(null);
 
+
+    const navigate = useNavigate();
+
     //SOUNDS
     const orderSoundRef = useRef(null);
     const callSoundRef = useRef(null);
     const [soundEnabled, setSoundEnabled] = useState(false);
+    const soundEnabledRef = useRef(false);
+
+    useEffect(() => {
+        soundEnabledRef.current = soundEnabled;
+    }, [soundEnabled]);
 
     // Data
     const [waiters, setWaiters] = useState([]);
@@ -35,7 +44,7 @@ export default function WaiterPage() {
     const waiterName = selectedWaiter?.name || "";
 
 
-    const enableSound = async () => {
+ /*    const enableSound = async () => {
         try {
             const a = orderSoundRef.current;
             if (!a) return;
@@ -49,7 +58,25 @@ export default function WaiterPage() {
         } catch (e) {
             console.log("Enable sound failed:", e);
         }
+    }; */
+
+    const enableSound = async () => {
+        try {
+            const a = orderSoundRef.current;
+            if (!a) return;
+
+            a.muted = true;
+            await a.play();
+            a.pause();
+            a.currentTime = 0;
+            a.muted = false;
+
+            setSoundEnabled(true);
+        } catch (e) {
+            console.log("Enable sound failed:", e);
+        }
     };
+
 
 
     // ---------- Loaders ----------
@@ -107,6 +134,30 @@ export default function WaiterPage() {
         }
     };
 
+    const unclaimOrder = async (orderId) => {
+        setErr("");
+        try {
+            const res = await fetch(`${api}/orders/${orderId}/unclaim`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ waiterId: selectedWaiterId }),
+            });
+
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+
+            // refresh my orders after unclaim
+            setLoadingMyOrders(true);
+            await loadMyOrders(selectedWaiterId);
+        } catch (e) {
+            setErr(e.message);
+        }
+    };
+
+
+
+
+
     // ---------- Mount ----------
     useEffect(() => {
         setErr("");
@@ -142,7 +193,7 @@ export default function WaiterPage() {
                 return [order, ...prev];
             });
 
-            if (!soundEnabled) return;
+            if (!soundEnabledRef.current) return;
             const a = orderSoundRef.current;
             if (!a) return;
 
@@ -159,7 +210,7 @@ export default function WaiterPage() {
             setOrders((prev) => prev.filter((o) => o.id !== orderId));
 
             // if this dashboard's selected waiter claimed it, refresh myOrders
-            if (claimedBy === selectedWaiterId) {
+            if (String(claimedBy) === String(selectedWaiterId)) {
                 setLoadingMyOrders(true);
                 loadMyOrders(claimedBy).catch(() => { });
             }
@@ -181,7 +232,7 @@ export default function WaiterPage() {
         // Calls realtime
         socket.on("call:new", (call) => {
             setCalls((prev) => [call, ...prev]);
-            if (soundEnabled) {
+            if (soundEnabledRef.current) {
                 callSoundRef.current?.play().catch(() => {
                     try { window.navigator.vibrate?.(120); } catch { }
                 });
@@ -191,6 +242,27 @@ export default function WaiterPage() {
         socket.on("call:handled", ({ callId }) => {
             setCalls((prev) => prev.filter((c) => c.id !== callId));
         });
+        socket.on("order:updated", (order) => {
+            // If order became UNCLAIMED → add it back to unclaimed list
+            if (order.status === "UNCLAIMED") {
+                setOrders((prev) => {
+                    if (prev.some((o) => o.id === order.id)) return prev;
+                    return [order, ...prev];
+                });
+            }
+
+            // If order is CLAIMED and belongs to me → refresh myOrders
+            if (order.status === "CLAIMED" && String(order.claimedById) === String(waiterId)) {
+                setLoadingMyOrders(true);
+                loadMyOrders().catch(() => { });
+            }
+
+            // Remove from myOrders if unclaimed
+            if (order.status === "UNCLAIMED") {
+                setMyOrders((prev) => prev.filter((o) => o.id !== order.id));
+            }
+        });
+
 
         socket.on("disconnect", () => console.log("❌ waiter socket disconnected"));
 
@@ -201,6 +273,7 @@ export default function WaiterPage() {
             socket.off("order:deleted");
             socket.off("call:new");
             socket.off("call:handled");
+            socket.off("order:updated");
             socket.off("disconnect");
             socket.disconnect();
         };
@@ -265,6 +338,8 @@ export default function WaiterPage() {
         }
     };
 
+
+
     // ---------- UI ----------
     return (
         <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Arial" }}>
@@ -291,6 +366,15 @@ export default function WaiterPage() {
                     <button onClick={enableSound}>
                         {soundEnabled ? "Sound ✅" : "Enable Sound"}
                     </button>
+
+                    <button
+                        disabled={!selectedWaiterId}
+                        onClick={() => navigate(`/w/${selectedWaiterId}`)}
+                        className="px-3 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+                    >
+                        Open Personal Page →
+                    </button>
+
 
                 </h1>
 
@@ -395,6 +479,8 @@ export default function WaiterPage() {
                                 >
                                     Claim
                                 </button>
+
+
                             </div>
 
                             <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
@@ -446,6 +532,23 @@ export default function WaiterPage() {
                                 >
                                     Done
                                 </button>
+                                {o.status === "CLAIMED" && (
+                                    <button
+                                        onClick={() => unclaimOrder(o.id)}
+                                        style={{
+                                            padding: "8px 12px",
+                                            fontWeight: 700,
+                                            background: "#e74c3c",
+                                            border: "none",
+                                            color: "white",
+                                            borderRadius: 6,
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Unclaim
+                                    </button>
+                                )}
+
                             </div>
 
                             <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>

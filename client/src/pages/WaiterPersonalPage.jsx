@@ -122,6 +122,26 @@ export default function WaiterPersonalPage() {
         socket.on("disconnect", () => {
             console.log("❌ personal waiter socket disconnected");
         });
+        socket.on("order:updated", (order) => {
+            // If order became UNCLAIMED → add it back to unclaimed list
+            if (order.status === "UNCLAIMED") {
+                setOrders((prev) => {
+                    if (prev.some((o) => o.id === order.id)) return prev;
+                    return [order, ...prev];
+                });
+            }
+
+            // If order is CLAIMED and belongs to me → refresh myOrders
+            if (order.status === "CLAIMED" && String(order.claimedById) === String(waiterId)) {
+                setLoadingMyOrders(true);
+                loadMyOrders().catch(() => { });
+            }
+
+            // Remove from myOrders if unclaimed
+            if (order.status === "UNCLAIMED") {
+                setMyOrders((prev) => prev.filter((o) => o.id !== order.id));
+            }
+        });
 
         return () => {
             socket.off("connect");
@@ -131,6 +151,8 @@ export default function WaiterPersonalPage() {
             socket.off("call:new");
             socket.off("call:handled");
             socket.off("disconnect");
+            socket.off("order:updated");
+
             socket.disconnect();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,12 +222,34 @@ export default function WaiterPersonalPage() {
         );
     }
 
+    const unclaimOrder = async (orderId) => {
+        setErr("");
+        try {
+            const res = await fetch(`${api}/orders/${orderId}/unclaim`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ waiterId }), // waiterId from useParams()
+            });
+
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+
+            setLoadingMyOrders(true);
+            await loadMyOrders();
+        } catch (e) {
+            setErr(e.message);
+        }
+    };
+
+
 
     return (
         <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Arial" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
                 <div>
                     <h1 style={{ margin: 0 }}>Waiter</h1>
+
+
                     <div style={{ opacity: 0.7, marginTop: 6 }}>
                         Personal page for waiterId: <b>{waiterId}</b>
                     </div>
@@ -317,6 +361,24 @@ export default function WaiterPersonalPage() {
                                 >
                                     Done
                                 </button>
+                                {o.status === "CLAIMED" && (
+                                    <button
+                                        onClick={() => unclaimOrder(o.id)}
+                                        style={{
+                                            padding: "8px 12px",
+                                            fontWeight: 700,
+                                            background: "#e74c3c",
+                                            border: "none",
+                                            color: "white",
+                                            borderRadius: 6,
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Unclaim
+                                    </button>
+                                )}
+
+
                             </div>
 
                             <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
