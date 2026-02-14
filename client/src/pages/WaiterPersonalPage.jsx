@@ -257,11 +257,36 @@ export default function WaiterPersonalPage() {
 
 
 
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <Link to="/waiter" style={{ opacity: 0.8 }}>
-                        Shared dashboard
-                    </Link>
-                </div>
+                <div style={{ display: "flex", gap: 10 }}>
+  <Link
+    to="/pick-waiter"
+    style={{
+      padding: "8px 14px",
+      backgroundColor: "#f3f4f6",
+      border: "1px solid #ddd",
+      borderRadius: 6,
+      textDecoration: "none",
+      color: "black",
+      fontWeight: 600,
+    }}
+  >
+    ← Change Waiter
+  </Link>
+
+  <Link
+    to="/waiter"
+    style={{
+      padding: "8px 14px",
+      backgroundColor: "#2563eb",
+      borderRadius: 6,
+      textDecoration: "none",
+      color: "white",
+      fontWeight: 600,
+    }}
+  >
+    Shared Dashboard
+  </Link>
+</div>
             </div>
 
             {err && <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {err}</p>}

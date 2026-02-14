@@ -3,6 +3,8 @@ import TablePage from "./pages/TablePage";
 import WaiterPage from "./pages/WaiterPage";
 import TablesDemoPage from "./pages/TablesDemoPage";
 import WaiterPersonalPage from "./pages/WaiterPersonalPage";
+import PickWaiter from "./pages/PickWaiter";
+
 
 
 
@@ -13,6 +15,7 @@ export default function App() {
       <Route path="/waiter" element={<WaiterPage />} />
       <Route path="/demo/tables" element={<TablesDemoPage />} />
       <Route path="/w/:waiterId" element={<WaiterPersonalPage />} />
+      <Route path="/pick-waiter" element={<PickWaiter />} />
       <Route path="*" element={<div>Kaki MMA samo bareknuckle gole šake!</div>} />
     </Routes>
   );

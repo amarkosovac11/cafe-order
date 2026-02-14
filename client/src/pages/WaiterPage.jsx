@@ -44,21 +44,21 @@ export default function WaiterPage() {
     const waiterName = selectedWaiter?.name || "";
 
 
- /*    const enableSound = async () => {
-        try {
-            const a = orderSoundRef.current;
-            if (!a) return;
-
-            // unlock autoplay on user gesture
-            await a.play();
-            a.pause();
-            a.currentTime = 0;
-
-            setSoundEnabled(true);
-        } catch (e) {
-            console.log("Enable sound failed:", e);
-        }
-    }; */
+    /*    const enableSound = async () => {
+           try {
+               const a = orderSoundRef.current;
+               if (!a) return;
+   
+               // unlock autoplay on user gesture
+               await a.play();
+               a.pause();
+               a.currentTime = 0;
+   
+               setSoundEnabled(true);
+           } catch (e) {
+               console.log("Enable sound failed:", e);
+           }
+       }; */
 
     const enableSound = async () => {
         try {
@@ -368,12 +368,21 @@ export default function WaiterPage() {
                     </button>
 
                     <button
-                        disabled={!selectedWaiterId}
-                        onClick={() => navigate(`/w/${selectedWaiterId}`)}
-                        className="px-3 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+                        onClick={() => navigate("/pick-waiter", { state: { from: "/waiter" } })}
+                        style={{
+                            padding: "8px 14px",
+                            backgroundColor: "#2563eb",   // blue
+                            color: "black",
+                            border: "none",
+                            borderRadius: 6,
+                            cursor: "pointer",
+                            fontWeight: 700,
+                        }}
                     >
                         Open Personal Page →
                     </button>
+
+
 
 
                 </h1>
@@ -407,49 +416,53 @@ export default function WaiterPage() {
                 </div>
             </div>
 
-            {!waiterId && (
-                <div
-                    style={{
-                        marginTop: 12,
-                        padding: 12,
-                        background: "#fff3cd",
-                        border: "1px solid #ffeeba",
-                        borderRadius: 8,
-                    }}
-                >
-                    Please select a waiter to use the dashboard.
-                </div>
-            )}
+            {
+                !waiterId && (
+                    <div
+                        style={{
+                            marginTop: 12,
+                            padding: 12,
+                            background: "#fff3cd",
+                            border: "1px solid #ffeeba",
+                            borderRadius: 8,
+                        }}
+                    >
+                        Please select a waiter to use the dashboard.
+                    </div>
+                )
+            }
 
             {err && <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {err}</p>}
 
             {/* CALLS */}
             <h2 style={{ marginTop: 18 }}>Calls</h2>
-            {loadingCalls ? (
-                <p>Loading calls…</p>
-            ) : calls.length === 0 ? (
-                <div style={{ opacity: 0.7, marginBottom: 16 }}>No open calls.</div>
-            ) : (
-                <div style={{ display: "grid", gap: 10, marginBottom: 16 }}>
-                    {calls.map((c) => (
-                        <div key={c.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                                <div>
-                                    <b>Table {c.tableId}</b> — {c.type === "bill" ? "💰 Bill" : "👋 Waiter"}
-                                    <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(c.createdAt).toLocaleString()}</div>
+            {
+                loadingCalls ? (
+                    <p>Loading calls…</p>
+                ) : calls.length === 0 ? (
+                    <div style={{ opacity: 0.7, marginBottom: 16 }}>No open calls.</div>
+                ) : (
+                    <div style={{ display: "grid", gap: 10, marginBottom: 16 }}>
+                        {calls.map((c) => (
+                            <div key={c.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                                    <div>
+                                        <b>Table {c.tableId}</b> — {c.type === "bill" ? "💰 Bill" : "👋 Waiter"}
+                                        <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(c.createdAt).toLocaleString()}</div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleCall(c.id)}
+                                        style={{ padding: "10px 14px", fontWeight: 700 }}
+                                        disabled={!waiterId}
+                                    >
+                                        Handled
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => handleCall(c.id)}
-                                    style={{ padding: "10px 14px", fontWeight: 700 }}
-                                    disabled={!waiterId}
-                                >
-                                    Handled
-                                </button>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+                        ))}
+                    </div>
+                )
+            }
 
             {/* UNCLAIMED ORDERS */}
             <h2 style={{ marginTop: 18 }}>Unclaimed Orders</h2>
@@ -457,115 +470,119 @@ export default function WaiterPage() {
                 New orders appear here. Click <b>Claim</b> to take responsibility.
             </p>
 
-            {loadingOrders ? (
-                <p>Loading orders…</p>
-            ) : orders.length === 0 ? (
-                <div style={{ opacity: 0.7 }}>No unclaimed orders.</div>
-            ) : (
-                <div style={{ display: "grid", gap: 12 }}>
-                    {orders.map((o) => (
-                        <div key={o.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                                <div>
-                                    <div style={{ fontWeight: 800 }}>Table {o.tableId}</div>
-                                    <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(o.createdAt).toLocaleString()}</div>
-                                    <div style={{ fontSize: 12, opacity: 0.7 }}>Order ID: {o.id}</div>
+            {
+                loadingOrders ? (
+                    <p>Loading orders…</p>
+                ) : orders.length === 0 ? (
+                    <div style={{ opacity: 0.7 }}>No unclaimed orders.</div>
+                ) : (
+                    <div style={{ display: "grid", gap: 12 }}>
+                        {orders.map((o) => (
+                            <div key={o.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                                    <div>
+                                        <div style={{ fontWeight: 800 }}>Table {o.tableId}</div>
+                                        <div style={{ fontSize: 12, opacity: 0.7 }}>{new Date(o.createdAt).toLocaleString()}</div>
+                                        <div style={{ fontSize: 12, opacity: 0.7 }}>Order ID: {o.id}</div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => claimOrder(o.id)}
+                                        style={{ padding: "10px 14px", fontWeight: 700 }}
+                                        disabled={!waiterId}
+                                    >
+                                        Claim
+                                    </button>
+
+
                                 </div>
 
-                                <button
-                                    onClick={() => claimOrder(o.id)}
-                                    style={{ padding: "10px 14px", fontWeight: 700 }}
-                                    disabled={!waiterId}
-                                >
-                                    Claim
-                                </button>
-
-
-                            </div>
-
-                            <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
-                                {o.items.map((it) => (
-                                    <div key={it.itemId} style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                                        <div>
-                                            <b>{it.name}</b> × {it.qty}
-                                            {it.note ? <div style={{ fontSize: 12, opacity: 0.8 }}>Note: {it.note}</div> : null}
+                                <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
+                                    {o.items.map((it) => (
+                                        <div key={it.itemId} style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                                            <div>
+                                                <b>{it.name}</b> × {it.qty}
+                                                {it.note ? <div style={{ fontSize: 12, opacity: 0.8 }}>Note: {it.note}</div> : null}
+                                            </div>
+                                            <div>{(it.price * it.qty).toFixed(2)} KM</div>
                                         </div>
-                                        <div>{(it.price * it.qty).toFixed(2)} KM</div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+                        ))}
+                    </div>
+                )
+            }
 
             {/* MY ORDERS */}
             <h2 style={{ marginTop: 18 }}>My Orders</h2>
-            {loadingMyOrders ? (
-                <p>Loading my orders…</p>
-            ) : myOrders.length === 0 ? (
-                <div style={{ opacity: 0.7 }}>No claimed orders yet.</div>
-            ) : (
-                <div style={{ display: "grid", gap: 12 }}>
-                    {myOrders.map((o) => (
-                        <div key={o.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                                <div>
-                                    <div style={{ fontWeight: 800 }}>Table {o.tableId}</div>
-                                    <div style={{ fontSize: 12, opacity: 0.7 }}>
-                                        Claimed at {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
+            {
+                loadingMyOrders ? (
+                    <p>Loading my orders…</p>
+                ) : myOrders.length === 0 ? (
+                    <div style={{ opacity: 0.7 }}>No claimed orders yet.</div>
+                ) : (
+                    <div style={{ display: "grid", gap: 12 }}>
+                        {myOrders.map((o) => (
+                            <div key={o.id} style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                                    <div>
+                                        <div style={{ fontWeight: 800 }}>Table {o.tableId}</div>
+                                        <div style={{ fontSize: 12, opacity: 0.7 }}>
+                                            Claimed at {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
+                                        </div>
+                                        <div style={{ fontSize: 12, opacity: 0.7 }}>Order ID: {o.id}</div>
                                     </div>
-                                    <div style={{ fontSize: 12, opacity: 0.7 }}>Order ID: {o.id}</div>
-                                </div>
 
-                                <button
-                                    onClick={() => finishOrder(o.id)}
-                                    style={{
-                                        padding: "8px 12px",
-                                        fontWeight: 700,
-                                        background: "#2ecc71",
-                                        border: "none",
-                                        color: "white",
-                                        borderRadius: 6,
-                                        cursor: "pointer",
-                                    }}
-                                >
-                                    Done
-                                </button>
-                                {o.status === "CLAIMED" && (
                                     <button
-                                        onClick={() => unclaimOrder(o.id)}
+                                        onClick={() => finishOrder(o.id)}
                                         style={{
                                             padding: "8px 12px",
                                             fontWeight: 700,
-                                            background: "#e74c3c",
+                                            background: "#2ecc71",
                                             border: "none",
                                             color: "white",
                                             borderRadius: 6,
                                             cursor: "pointer",
                                         }}
                                     >
-                                        Unclaim
+                                        Done
                                     </button>
-                                )}
+                                    {o.status === "CLAIMED" && (
+                                        <button
+                                            onClick={() => unclaimOrder(o.id)}
+                                            style={{
+                                                padding: "8px 12px",
+                                                fontWeight: 700,
+                                                background: "#e74c3c",
+                                                border: "none",
+                                                color: "white",
+                                                borderRadius: 6,
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            Unclaim
+                                        </button>
+                                    )}
 
-                            </div>
+                                </div>
 
-                            <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
-                                {o.items.map((it) => (
-                                    <div key={it.itemId} style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                                        <div>
-                                            <b>{it.name}</b> × {it.qty}
-                                            {it.note ? <div style={{ fontSize: 12, opacity: 0.8 }}>Note: {it.note}</div> : null}
+                                <div style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
+                                    {o.items.map((it) => (
+                                        <div key={it.itemId} style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                                            <div>
+                                                <b>{it.name}</b> × {it.qty}
+                                                {it.note ? <div style={{ fontSize: 12, opacity: 0.8 }}>Note: {it.note}</div> : null}
+                                            </div>
+                                            <div>{(it.price * it.qty).toFixed(2)} KM</div>
                                         </div>
-                                        <div>{(it.price * it.qty).toFixed(2)} KM</div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
+                        ))}
+                    </div>
+                )
+            }
+        </div >
     );
 }
