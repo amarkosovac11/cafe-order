@@ -20,6 +20,41 @@ export default function WaiterPersonalPage() {
     const [waiterInfo, setWaiterInfo] = useState(null);
     const [loadingWaiter, setLoadingWaiter] = useState(true);
 
+    // SOUNDS
+    const orderSoundRef = useRef(null);
+    const callSoundRef = useRef(null);
+    const [soundEnabled, setSoundEnabled] = useState(false);
+    const soundEnabledRef = useRef(false);
+
+    useEffect(() => {
+        soundEnabledRef.current = soundEnabled;
+    }, [soundEnabled]);
+
+    const toggleSound = async () => {
+        // If already enabled → disable it
+        if (soundEnabledRef.current) {
+            setSoundEnabled(false);
+            return;
+        }
+
+        // If disabled → enable it (unlock autoplay)
+        try {
+            const a = orderSoundRef.current;
+            if (!a) return;
+
+            a.muted = true;
+            await a.play();
+            a.pause();
+            a.currentTime = 0;
+            a.muted = false;
+
+            setSoundEnabled(true);
+        } catch (e) {
+            console.log("Enable sound failed:", e);
+        }
+    };
+
+
     const loadWaiter = async () => {
         setLoadingWaiter(true);
         try {
@@ -93,8 +128,20 @@ export default function WaiterPersonalPage() {
         });
 
         socket.on("order:new", (order) => {
-            setOrders((prev) => [order, ...prev]);
+            setOrders((prev) => {
+                if (prev.some((o) => o.id === order.id)) return prev;
+                return [order, ...prev];
+            });
+
+            if (!soundEnabledRef.current) return;
+            const a = orderSoundRef.current;
+            if (!a) return;
+            try { a.currentTime = 0; } catch { }
+            a.play().catch(() => {
+                try { window.navigator.vibrate?.(80); } catch { }
+            });
         });
+
 
         socket.on("order:claimed", ({ orderId, waiterId: claimedBy }) => {
             setOrders((prev) => prev.filter((o) => o.id !== orderId));
@@ -113,7 +160,16 @@ export default function WaiterPersonalPage() {
 
         socket.on("call:new", (call) => {
             setCalls((prev) => [call, ...prev]);
+
+            if (!soundEnabledRef.current) return;
+            const a = callSoundRef.current;
+            if (!a) return;
+            try { a.currentTime = 0; } catch { }
+            a.play().catch(() => {
+                try { window.navigator.vibrate?.(120); } catch { }
+            });
         });
+
 
         socket.on("call:handled", ({ callId }) => {
             setCalls((prev) => prev.filter((c) => c.id !== callId));
@@ -249,6 +305,25 @@ export default function WaiterPersonalPage() {
                 <div>
                     <h1 style={{ margin: 0 }}>Waiter</h1>
 
+                    <button
+                        onClick={toggleSound}
+                        style={{
+                            padding: "8px 14px",
+                            backgroundColor: soundEnabled ? "#16a34a" : "#2563eb",
+                            color: "white",
+                            border: "none",
+                            borderRadius: 6,
+                            cursor: "pointer",
+                            fontWeight: 700,
+                        }}
+                    >
+                        {soundEnabled ? "Sound ✅" : "Enable Sound"}
+                    </button>
+
+                    <audio ref={orderSoundRef} src="/sounds/new-order.mp3" preload="auto" />
+                    <audio ref={callSoundRef} src="/sounds/new-call.mp3" preload="auto" />
+
+
 
                     <div style={{ opacity: 0.7, marginTop: 6 }}>
                         Personal page for waiterId: <b>{waiterId}</b>
@@ -258,35 +333,35 @@ export default function WaiterPersonalPage() {
 
 
                 <div style={{ display: "flex", gap: 10 }}>
-  <Link
-    to="/pick-waiter"
-    style={{
-      padding: "8px 14px",
-      backgroundColor: "#f3f4f6",
-      border: "1px solid #ddd",
-      borderRadius: 6,
-      textDecoration: "none",
-      color: "black",
-      fontWeight: 600,
-    }}
-  >
-    ← Change Waiter
-  </Link>
+                    <Link
+                        to="/pick-waiter"
+                        style={{
+                            padding: "8px 14px",
+                            backgroundColor: "#f3f4f6",
+                            border: "1px solid #ddd",
+                            borderRadius: 6,
+                            textDecoration: "none",
+                            color: "black",
+                            fontWeight: 600,
+                        }}
+                    >
+                        ← Change Waiter
+                    </Link>
 
-  <Link
-    to="/waiter"
-    style={{
-      padding: "8px 14px",
-      backgroundColor: "#2563eb",
-      borderRadius: 6,
-      textDecoration: "none",
-      color: "white",
-      fontWeight: 600,
-    }}
-  >
-    Shared Dashboard
-  </Link>
-</div>
+                    <Link
+                        to="/waiter"
+                        style={{
+                            padding: "8px 14px",
+                            backgroundColor: "#2563eb",
+                            borderRadius: 6,
+                            textDecoration: "none",
+                            color: "white",
+                            fontWeight: 600,
+                        }}
+                    >
+                        Shared Dashboard
+                    </Link>
+                </div>
             </div>
 
             {err && <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {err}</p>}

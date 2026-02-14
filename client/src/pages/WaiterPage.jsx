@@ -60,7 +60,14 @@ export default function WaiterPage() {
            }
        }; */
 
-    const enableSound = async () => {
+    const toggleSound = async () => {
+        // If already enabled → disable it
+        if (soundEnabledRef.current) {
+            setSoundEnabled(false);
+            return;
+        }
+
+        // If disabled → enable it (unlock autoplay)
         try {
             const a = orderSoundRef.current;
             if (!a) return;
@@ -76,6 +83,7 @@ export default function WaiterPage() {
             console.log("Enable sound failed:", e);
         }
     };
+
 
 
 
@@ -363,7 +371,7 @@ export default function WaiterPage() {
                         Test sound
                     </button>
 
-                    <button onClick={enableSound}>
+                    <button onClick={toggleSound}>
                         {soundEnabled ? "Sound ✅" : "Enable Sound"}
                     </button>
 
