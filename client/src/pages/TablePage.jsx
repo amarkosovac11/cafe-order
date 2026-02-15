@@ -1,313 +1,423 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
-
+import { useParams, useSearchParams } from "react-router-dom";
+import "../css/TablePage.css";
 
 export default function TablePage() {
-    const { tableId } = useParams();
-    const api = import.meta.env.VITE_API_URL;
+  const { tableId } = useParams();
+  const api = import.meta.env.VITE_API_URL;
 
-    const [menu, setMenu] = useState([]);
-    const [err, setErr] = useState("");
-    const [loading, setLoading] = useState(true);
+  const [menu, setMenu] = useState([]);
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
 
-    // cart: { [itemId]: { itemId, name, price, qty, note } }
-    const [cart, setCart] = useState({});
-    const [placing, setPlacing] = useState(false);
-    const [placedMsg, setPlacedMsg] = useState("");
-    const [callMsg, setCallMsg] = useState("");
+  // cart: { [itemId]: { itemId, name, price, qty, note } }
+  const [cart, setCart] = useState({});
+  const [placing, setPlacing] = useState(false);
+  const [placedMsg, setPlacedMsg] = useState("");
+  const [callMsg, setCallMsg] = useState("");
 
-    // Token (optional for now)
-    const [searchParams] = useSearchParams();
-    const token = searchParams.get("token") || "";
+  const [cartOpen, setCartOpen] = useState(false);
 
-    useEffect(() => {
-        fetch(`${api}/menu`)
-            .then(async (r) => {
-                if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                return r.json();
-            })
-            .then((data) => setMenu(data))
-            .catch((e) => setErr(e.message))
-            .finally(() => setLoading(false));
-    }, [api]);
+  // null => categories screen, otherwise items screen for that category
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-    const flatItems = useMemo(
-        () => menu.flatMap((c) => c.items.map((it) => ({ ...it, category: c.name }))),
-        [menu]
-    );
+  // Token (optional)
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token") || "";
 
-    const cartItems = useMemo(() => Object.values(cart), [cart]);
+  useEffect(() => {
+    fetch(`${api}/menu`)
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => setMenu(data))
+      .catch((e) => setErr(e.message))
+      .finally(() => setLoading(false));
+  }, [api]);
 
-    const total = useMemo(
-        () => cartItems.reduce((sum, it) => sum + it.price * it.qty, 0),
-        [cartItems]
-    );
+  const categories = useMemo(() => menu.map((c) => c.name), [menu]);
 
-    const addItem = (it) => {
-        setPlacedMsg("");
-        setCart((prev) => {
-            const existing = prev[it.id];
-            const qty = existing ? existing.qty + 1 : 1;
-            return {
-                ...prev,
-                [it.id]: {
-                    itemId: it.id,
-                    name: it.name,
-                    price: it.price,
-                    qty,
-                    note: existing?.note ?? "",
-                },
-            };
-        });
-    };
+  const itemsForSelected = useMemo(() => {
+    if (!selectedCategory) return [];
+    const cat = menu.find((c) => c.name === selectedCategory);
+    const items = cat?.items || [];
+    return items.map((it) => ({ ...it, category: selectedCategory }));
+  }, [menu, selectedCategory]);
 
-    const removeOne = (itemId) => {
-        setPlacedMsg("");
-        setCart((prev) => {
-            const existing = prev[itemId];
-            if (!existing) return prev;
+  const cartItems = useMemo(() => Object.values(cart), [cart]);
 
-            if (existing.qty <= 1) {
-                const copy = { ...prev };
-                delete copy[itemId];
-                return copy;
-            }
+  const total = useMemo(
+    () => cartItems.reduce((sum, it) => sum + it.price * it.qty, 0),
+    [cartItems]
+  );
 
-            return { ...prev, [itemId]: { ...existing, qty: existing.qty - 1 } };
-        });
-    };
+  const cartQty = useMemo(
+    () => cartItems.reduce((s, x) => s + x.qty, 0),
+    [cartItems]
+  );
 
-    const setNote = (itemId, note) => {
-        setPlacedMsg("");
-        setCart((prev) => ({
-            ...prev,
-            [itemId]: { ...prev[itemId], note },
-        }));
-    };
+  const hasItems = cartItems.length > 0;
 
-    const placeOrder = async () => {
-        setErr("");
-        setPlacedMsg("");
-        setCallMsg("");
+  const addItem = (it) => {
+    setPlacedMsg("");
+    setErr("");
+    setCallMsg("");
 
-        if (cartItems.length === 0) {
-            setErr("Cart is empty.");
-            return;
-        }
+    // Optional nice UX: open cart when user adds first item
+    setCartOpen(true);
 
-        // ✅ Build payloadItems correctly
-        const payloadItems = cartItems.map((it) => ({
-            itemId: it.itemId,
-            name: it.name,
-            price: it.price,
-            qty: it.qty,
-            note: it.note || "",
-        }));
-
-        setPlacing(true);
-        try {
-            const body = { tableId, items: payloadItems };
-            if (token) body.token = token; // optional (for later security)
-
-            const res = await fetch(`${api}/orders`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-
-            const text = await res.text();
-            if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-
-            setCart({});
-            setPlacedMsg("✅ Order sent! Waiter will see it now.");
-        } catch (e) {
-            setErr(e.message);
-        } finally {
-            setPlacing(false);
-        }
-    };
-
-    const callWaiter = async () => {
-        setErr("");
-        setCallMsg("");
-        setPlacedMsg("");
-
-        try {
-            const body = { tableId, type: "waiter" };
-            if (token) body.token = token; // optional (for later security)
-
-            const res = await fetch(`${api}/calls`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-
-            const text = await res.text();
-            if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-
-            setCallMsg("✅ Waiter has been notified.");
-        } catch (e) {
-            setErr(e.message);
-        }
-    };
-
-    const requestBill = async () => {
-  setErr("");
-  setCallMsg("");
-  try {
-    const body = { tableId, type: "bill" };
-    if (token) body.token = token;
-
-    const res = await fetch(`${api}/calls`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+    setCart((prev) => {
+      const existing = prev[it.id];
+      const qty = existing ? existing.qty + 1 : 1;
+      return {
+        ...prev,
+        [it.id]: {
+          itemId: it.id,
+          name: it.name,
+          price: it.price,
+          qty,
+          note: existing?.note ?? "",
+        },
+      };
     });
+  };
 
-    const text = await res.text();
-    if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+  const removeOne = (itemId) => {
+    setPlacedMsg("");
+    setCart((prev) => {
+      const existing = prev[itemId];
+      if (!existing) return prev;
 
-    setCallMsg("✅ Bill requested.");
-  } catch (e) {
-    setErr(e.message);
-  }
-};
+      if (existing.qty <= 1) {
+        const copy = { ...prev };
+        delete copy[itemId];
+        return copy;
+      }
 
+      return { ...prev, [itemId]: { ...existing, qty: existing.qty - 1 } };
+    });
+  };
 
+  const setNote = (itemId, note) => {
+    setPlacedMsg("");
+    setCart((prev) => ({
+      ...prev,
+      [itemId]: { ...prev[itemId], note },
+    }));
+  };
 
+  const placeOrder = async () => {
+    setErr("");
+    setPlacedMsg("");
+    setCallMsg("");
 
+    if (!hasItems) {
+      setErr("Cart is empty.");
+      return;
+    }
 
-    return (
-        <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Arial" }}>
-            <h1>Table {tableId}</h1>
-            <p style={{ opacity: 0.7 }}>Choose items → add notes → Finish order</p>
+    const payloadItems = cartItems.map((it) => ({
+      itemId: it.itemId,
+      name: it.name,
+      price: it.price,
+      qty: it.qty,
+      note: it.note || "",
+    }));
 
-            {err && <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {err}</p>}
-            {placedMsg && <p style={{ color: "green" }}>{placedMsg}</p>}
+    setPlacing(true);
+    try {
+      const body = { tableId, items: payloadItems };
+      if (token) body.token = token;
 
-            {callMsg && <p style={{ color: "green" }}>{callMsg}</p>}
+      const res = await fetch(`${api}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-            <button
-                onClick={callWaiter}
-                style={{ padding: "10px 12px", fontWeight: 700, marginBottom: 16 }}
-            >
-                Call waiter
-            </button>
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-            <button
-                onClick={requestBill}
-                style={{ padding: "10px 12px", fontWeight: 700, marginBottom: 16 }}
-            >
-                Request Bill
-            </button>
+      setCart({});
+      setPlacedMsg("✅ Order sent! Waiter will see it now.");
+      setCartOpen(false);
+      setSelectedCategory(null); // optional: back to categories
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setPlacing(false);
+    }
+  };
 
-            
+  const callWaiter = async () => {
+    setErr("");
+    setCallMsg("");
+    setPlacedMsg("");
 
+    try {
+      const body = { tableId, type: "waiter" };
+      if (token) body.token = token;
 
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
-                {/* MENU */}
-                <div>
-                    <h2 style={{ marginTop: 0 }}>Menu</h2>
+      const res = await fetch(`${api}/calls`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-                    {loading && <p>Loading menu…</p>}
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-                    {!loading && (
-                        <div style={{ display: "grid", gap: 12 }}>
-                            {flatItems.map((it) => (
-                                <div
-                                    key={it.id}
-                                    style={{
-                                        border: "1px solid #ddd",
-                                        borderRadius: 10,
-                                        padding: 12,
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <div>
-                                        <div style={{ fontWeight: 700 }}>{it.name}</div>
-                                        <div style={{ fontSize: 12, opacity: 0.7 }}>{it.category}</div>
-                                    </div>
+      setCallMsg("✅ Waiter has been notified.");
+    } catch (e) {
+      setErr(e.message);
+    }
+  };
 
-                                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                                        <div style={{ fontWeight: 700 }}>{it.price.toFixed(2)} KM</div>
-                                        <button onClick={() => addItem(it)} style={{ padding: "8px 12px" }}>
-                                            Add
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+  const requestBill = async () => {
+    setErr("");
+    setCallMsg("");
+    setPlacedMsg("");
 
-                {/* CART */}
-                <div style={{ border: "1px solid #ddd", borderRadius: 10, padding: 12 }}>
-                    <h2 style={{ marginTop: 0 }}>Cart</h2>
+    try {
+      const body = { tableId, type: "bill" };
+      if (token) body.token = token;
 
-                    {cartItems.length === 0 ? (
-                        <p style={{ opacity: 0.7 }}>No items yet.</p>
-                    ) : (
-                        <div style={{ display: "grid", gap: 12 }}>
-                            {cartItems.map((ci) => (
-                                <div key={ci.itemId} style={{ borderTop: "1px solid #eee", paddingTop: 10 }}>
-                                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                                        <div style={{ fontWeight: 700 }}>
-                                            {ci.name} × {ci.qty}
-                                        </div>
-                                        <div style={{ fontWeight: 700 }}>
-                                            {(ci.price * ci.qty).toFixed(2)} KM
-                                        </div>
-                                    </div>
+      const res = await fetch(`${api}/calls`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-                                    <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                                        <button onClick={() => removeOne(ci.itemId)} style={{ padding: "6px 10px" }}>
-                                            −
-                                        </button>
-                                        <button onClick={() => addItem({ id: ci.itemId, name: ci.name, price: ci.price })} style={{ padding: "6px 10px" }}>
-                                            +
-                                        </button>
-                                    </div>
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-                                    <div style={{ marginTop: 8 }}>
-                                        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>
-                                            Note (optional)
-                                        </div>
-                                        <input
-                                            value={ci.note}
-                                            onChange={(e) => setNote(ci.itemId, e.target.value)}
-                                            placeholder="e.g. oat milk, no sugar, extra hot…"
-                                            style={{ width: "100%", padding: 8 }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+      setCallMsg("✅ Bill requested.");
+    } catch (e) {
+      setErr(e.message);
+    }
+  };
 
-                    <div style={{ marginTop: 14, borderTop: "1px solid #eee", paddingTop: 12 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                            <div style={{ fontWeight: 700 }}>Total</div>
-                            <div style={{ fontWeight: 700 }}>{total.toFixed(2)} KM</div>
-                        </div>
-
-                        <button
-                            onClick={placeOrder}
-                            disabled={placing || cartItems.length === 0}
-                            style={{
-                                marginTop: 12,
-                                width: "100%",
-                                padding: "10px 12px",
-                                fontWeight: 700,
-                            }}
-                        >
-                            {placing ? "Sending..." : "Finish order"}
-                        </button>
-                    </div>
-                </div>
+  return (
+    <div className="tp-page">
+      <div className="tp-shell">
+        {/* Header */}
+        <div className="tp-header">
+          <div>
+            <div className="tp-kicker">Cafe Menu</div>
+            <h1 className="tp-h1">Table {tableId}</h1>
+            <div className="tp-sub">
+              {selectedCategory ? "Pick items and add to cart" : "Choose a category to start"}
             </div>
+          </div>
+
+          <div className="tp-headerActions">
+            <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
+              Call waiter
+            </button>
+            <button onClick={requestBill} className="tp-btn tp-btn--secondary">
+              Request bill
+            </button>
+
+            <button
+              onClick={() => setCartOpen(true)}
+              className="tp-btn tp-btn--secondary tp-cartBtn"
+            >
+              Cart
+              <span className="tp-cartCount">{cartQty}</span>
+            </button>
+          </div>
         </div>
-    );
+
+        {/* Alerts */}
+        <div className="tp-alerts">
+          {err && (
+            <div className="tp-alert tp-alert--error">
+              <div className="tp-alertTitle">Error</div>
+              <div className="tp-alertBody">{err}</div>
+            </div>
+          )}
+          {placedMsg && (
+            <div className="tp-alert tp-alert--success">
+              <div className="tp-alertTitle">Order</div>
+              <div className="tp-alertBody">{placedMsg}</div>
+            </div>
+          )}
+          {callMsg && (
+            <div className="tp-alert tp-alert--success">
+              <div className="tp-alertTitle">Notification</div>
+              <div className="tp-alertBody">{callMsg}</div>
+            </div>
+          )}
+        </div>
+
+        {/* MAIN CARD */}
+        <div className="tp-card">
+          <div className="tp-cardHeader">
+            {selectedCategory ? (
+              <>
+                <div>
+                  <div className="tp-kicker">Category</div>
+                  <h2 className="tp-h2" style={{ marginTop: 6 }}>
+                    {selectedCategory}
+                  </h2>
+                </div>
+
+                <button
+                  className="tp-btn tp-btn--secondary"
+                  onClick={() => setSelectedCategory(null)}
+                >
+                  ← Back
+                </button>
+              </>
+            ) : (
+              <>
+                <h2 className="tp-h2">Categories</h2>
+                <div className="tp-badge">{categories.length} total</div>
+              </>
+            )}
+          </div>
+
+          {loading && <div className="tp-muted" style={{ padding: 14 }}>Loading…</div>}
+
+          {!loading && !selectedCategory && (
+            <div className="tp-categoriesGrid">
+              {categories.map((cat) => {
+                const count = menu.find((c) => c.name === cat)?.items?.length || 0;
+                return (
+                  <button
+                    key={cat}
+                    className="tp-categoryCard"
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    <div className="tp-categoryName">{cat}</div>
+                    <div className="tp-categoryMeta">{count} items</div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {!loading && selectedCategory && (
+            <div className="tp-menuList">
+              {itemsForSelected.map((it) => (
+                <div key={it.id} className="tp-menuItem">
+                  <div className="tp-itemLeft">
+                    <div className="tp-itemName">{it.name}</div>
+                    <div className="tp-itemMeta">
+                      <span className="tp-metaPill">{selectedCategory}</span>
+                    </div>
+                  </div>
+
+                  <div className="tp-itemRight">
+                    <div className="tp-price">{it.price.toFixed(2)} KM</div>
+                    <button onClick={() => addItem(it)} className="tp-btn tp-btn--primary">
+                      Add
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* CART DRAWER */}
+        {cartOpen && (
+          <div className="tp-drawerOverlay" onClick={() => setCartOpen(false)}>
+            <div className="tp-drawer" onClick={(e) => e.stopPropagation()}>
+              <div className="tp-drawerHeader">
+                <div>
+                  <div className="tp-kicker">Your Order</div>
+                  <h2 className="tp-h2" style={{ marginTop: 6 }}>
+                    Cart
+                  </h2>
+                </div>
+
+                <button
+                  className="tp-btn tp-btn--icon"
+                  onClick={() => setCartOpen(false)}
+                  aria-label="Close cart"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="tp-drawerBody">
+                {!hasItems ? (
+                  <div className="tp-empty">
+                    <div className="tp-emptyTitle">No items yet</div>
+                    <div className="tp-muted">Add something from the menu.</div>
+                  </div>
+                ) : (
+                  <div className="tp-cartList">
+                    {cartItems.map((ci) => (
+                      <div key={ci.itemId} className="tp-cartItem">
+                        <div className="tp-cartTop">
+                          <div className="tp-cartName">
+                            {ci.name} <span className="tp-qty">× {ci.qty}</span>
+                          </div>
+                          <div className="tp-cartPrice">
+                            {(ci.price * ci.qty).toFixed(2)} KM
+                          </div>
+                        </div>
+
+                        <div className="tp-qtyRow">
+                          <button
+                            onClick={() => removeOne(ci.itemId)}
+                            className="tp-btn tp-btn--icon"
+                            aria-label="Decrease quantity"
+                          >
+                            −
+                          </button>
+                          <button
+                            onClick={() =>
+                              addItem({ id: ci.itemId, name: ci.name, price: ci.price })
+                            }
+                            className="tp-btn tp-btn--icon"
+                            aria-label="Increase quantity"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <div className="tp-noteBlock">
+                          <div className="tp-inputLabel">Note (optional)</div>
+                          <input
+                            value={ci.note}
+                            onChange={(e) => setNote(ci.itemId, e.target.value)}
+                            placeholder="e.g. oat milk, no sugar…"
+                            className="tp-input"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="tp-drawerFooter">
+                <div className="tp-totalRow">
+                  <div className="tp-totalLabel">Total</div>
+                  <div className="tp-totalValue">{total.toFixed(2)} KM</div>
+                </div>
+
+                <button
+                  onClick={placeOrder}
+                  disabled={placing || !hasItems}
+                  className="tp-btn tp-btn--checkout"
+                >
+                  {placing ? "Sending…" : "Finish order"}
+                </button>
+
+                <div className="tp-finePrint">Order goes instantly to the waiter.</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="tp-footerHint">Tip: use Cart button to review your order.</div>
+      </div>
+    </div>
+  );
 }

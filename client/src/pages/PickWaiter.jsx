@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import "../css/PickWaiter.css";
 
 export default function PickWaiter() {
   const api = import.meta.env.VITE_API_URL;
@@ -36,48 +37,36 @@ export default function PickWaiter() {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Arial" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <div>
-          <h1 style={{ margin: 0 }}>Pick waiter</h1>
-          <div style={{ opacity: 0.7, marginTop: 6 }}>Choose your name to open your personal page.</div>
+    <div className="pw-page">
+      <div className="pw-shell">
+        <div className="pw-top">
+          <div>
+            <h1 className="pw-title">Pick waiter</h1>
+            <div className="pw-sub">Choose your name to open your personal page.</div>
+          </div>
+
+          <Link to={from} className="pw-back">
+            ← Back
+          </Link>
         </div>
 
-        <Link to={from} style={{ opacity: 0.8 }}>
-          ← Back
-        </Link>
+        {err && <div className="pw-alert">Error: {err}</div>}
+
+        {loading ? (
+          <div className="pw-loading">Loading waiters…</div>
+        ) : waiters.length === 0 ? (
+          <div className="pw-empty">No active waiters found.</div>
+        ) : (
+          <div className="pw-grid">
+            {waiters.map((w) => (
+              <button key={w.id} onClick={() => pick(w)} className="pw-card">
+                <div className="pw-name">{w.name}</div>
+                <div className="pw-meta">ID: {w.id}</div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-
-      {err && <p style={{ color: "red", whiteSpace: "pre-wrap" }}>Error: {err}</p>}
-
-      {loading ? (
-        <p>Loading waiters…</p>
-      ) : waiters.length === 0 ? (
-        <p style={{ opacity: 0.7 }}>No active waiters found.</p>
-      ) : (
-        <div style={{ display: "grid", gap: 12, marginTop: 18 }}>
-          {waiters.map((w) => (
-            <button
-              key={w.id}
-              onClick={() => pick(w)}
-              style={{
-                padding: "16px 18px",
-                textAlign: "left",
-                borderRadius: 12,
-                border: "1px solid #ffffff",
-                background: "grey",
-                color: "black",
-                cursor: "pointer",
-                fontSize: 18,
-                fontWeight: 800,
-              }}
-            >
-              {w.name}
-              <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>ID: {w.id}</div>
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
