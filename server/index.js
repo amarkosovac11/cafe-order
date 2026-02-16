@@ -8,7 +8,12 @@ const app = express();
 const prisma = new PrismaClient();
 
 // Middleware
-app.use(cors());
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+
+app.use(cors({
+  origin: CLIENT_ORIGIN,
+  credentials: true,
+}));
 app.use(express.json());
 
 async function requireValidTable(req, res, next) {
@@ -37,8 +42,9 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: CLIENT_ORIGIN,
     methods: ["GET", "POST", "PATCH", "DELETE"],
+    credentials: true,
   },
 });
 
@@ -371,6 +377,6 @@ app.get("/waiters/:waiterId", async (req, res) => {
 });
 
 // Start server
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port", PORT);
 });
