@@ -11,7 +11,10 @@ https://www.docker.com/products/docker-desktop/
 ## 2️⃣ Clone the repository
 
 ```bash
+
+
 git clone https://github.com/amarkosovac11/cafe-order
+
 cd cafe-order
 ```
 
