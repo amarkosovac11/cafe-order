@@ -21,16 +21,33 @@ cd cafe-order
 ## 3️⃣ Start everything (make sure Docker Desktop is running)
 
 ```bash
+docker compose down -v
 docker compose up --build
 ```
 
-## 4️⃣ Open in browser
+## Routes
 
-Frontend:
+### Frontend:
 
 ```bash
 http://localhost:5173
 ```
+
+### Customer
+
+```bash
+/t/:tableId – Table ordering page
+/t/:tableId?token=xxxx – Table with token validation
+/demo/table - Demo page for tables
+```
+
+### Waiter
+
+```bash
+/waiter – Waiter dashboard
+/waiter/:waiterId – Personal waiter page
+```
+
 
 Backend:
 
