@@ -1,70 +1,290 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function TablesDemoPage() {
-  const [count, setCount] = useState(20);
+  const api = import.meta.env.VITE_API_URL;
 
-  const tables = useMemo(() => {
-    const n = Math.max(1, Math.min(200, Number(count) || 1));
-    return Array.from({ length: n }, (_, i) => i + 1);
-  }, [count]);
+  const [tables, setTables] = useState([]);
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const openTable = (id) => {
-    window.open(`/t/${id}`, "_blank", "noopener,noreferrer");
-  };
+  const [hoverId, setHoverId] = useState(null);
+
+  const [ordersOpen, setOrdersOpen] = useState(false);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersErr, setOrdersErr] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [ordersTableId, setOrdersTableId] = useState("");
+
+  const adminUser = import.meta.env.VITE_ADMIN_USER;
+  const adminPass = import.meta.env.VITE_ADMIN_PASS;
+  const adminAuth = "Basic " + btoa(`${adminUser}:${adminPass}`);
+
+
+  async function loadTables() {
+    setErr("");
+    setLoading(true);
+    try {
+      const r = await adminFetch(`${api}/api/admin/tables`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      setTables(data);
+    } catch (e) {
+      setErr(`Failed to load tables: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function adminFetch(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: adminAuth,
+    },
+  });
+}
+
+  useEffect(() => {
+    loadTables();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function openTable(tableId) {
+    setErr("");
+    const r = await adminFetch(`${api}/api/admin/tables/${tableId}/scan-url`);
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      setErr(j.error || "Failed to get scan url");
+      return;
+    }
+    const { url } = await r.json();
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  async function viewOrders(tableId) {
+    setOrdersTableId(tableId);
+    setOrdersErr("");
+    setOrders([]);
+    setOrdersOpen(true);
+    setOrdersLoading(true);
+
+    try {
+      const r = await adminFetch(`${api}/api/admin/tables/${tableId}/orders`);
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error(j.error || `HTTP ${r.status}`);
+      }
+      const data = await r.json();
+      setOrders(data);
+    } catch (e) {
+      setOrdersErr(e.message);
+    } finally {
+      setOrdersLoading(false);
+    }
+  }
+
 
   return (
-    <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "Arial" }}>
-      <h1 style={{ marginTop: 0 }}>Demo: Tables</h1>
-      <p style={{ opacity: 0.75, marginTop: 6 }}>
-        Developer-only helper. Opens customer table pages in new tabs. Customers won’t see this.
+    <div
+      style={{
+        maxWidth: 950,
+        margin: "40px auto",
+        padding: 20,
+        color: "white",
+        backgroundColor: "#111827",
+        borderRadius: 12,
+      }}
+    >
+      <h1 style={{ marginBottom: 8 }}>Admin — See Tables</h1>
+      <p style={{ marginTop: 0, opacity: 0.75 }}>
+        View tables and open the table page with the correct token.
       </p>
 
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          alignItems: "center",
-          padding: 12,
-          border: "1px solid #eee",
-          borderRadius: 10,
-          marginTop: 12,
-        }}
-      >
-        <label style={{ fontWeight: 700 }}>Number of tables:</label>
-        <input
-          value={count}
-          onChange={(e) => setCount(e.target.value)}
-          type="number"
-          min={1}
-          max={200}
-          style={{ padding: 8, width: 120}}
-        />
-        <span style={{ opacity: 0.7 }}>Tip: set 12, 20, 30…</span>
+      {err && <div style={{ color: "#f87171", marginBottom: 10 }}>{err}</div>}
+      {loading && <div style={{ opacity: 0.8 }}>Loading…</div>}
+
+      <div style={{ border: "1px solid #374151", borderRadius: 10, overflow: "hidden" }}>
+        {tables.map((t) => {
+          const hovered = hoverId === t.id;
+
+          return (
+            <div
+              key={t.id}
+              onMouseEnter={() => setHoverId(t.id)}
+              onMouseLeave={() => setHoverId(null)}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                padding: "10px 12px",
+                borderBottom: "1px solid #1f2937",
+                alignItems: "center",
+                backgroundColor: hovered ? "#0b1220" : "transparent",
+                transition: "background-color 120ms ease",
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 800 }}>
+                  {t.id} {t.name ? `— ${t.name}` : ""}
+                </div>
+                <div style={{ fontSize: 12, opacity: 0.75 }}>
+                  {t.isActive ? "Active" : "Inactive"} • token: {String(t.token).slice(0, 8)}…
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                {hovered && (
+                  <button
+                    onClick={() => viewOrders(t.id)}
+                    style={{
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                      backgroundColor: "#374151",
+                      color: "white",
+                      border: "none",
+                      borderRadius: 6,
+                      fontWeight: 700,
+                    }}
+                    title="Show orders for this table"
+                  >
+                    View Orders
+                  </button>
+                )}
+
+                <button
+                  onClick={() => openTable(t.id)}
+                  style={{
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    backgroundColor: "#2563eb",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 6,
+                    fontWeight: 700,
+                  }}
+                >
+                  Open (with token)
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        {tables.length === 0 && !loading && (
+          <div style={{ padding: 14, opacity: 0.7 }}>No tables found.</div>
+        )}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 12, marginTop: 16 }}>
-        {tables.map((t) => (
-          <button
-            key={t}
-            onClick={() => openTable(t)}
+      {ordersOpen && (
+        <div
+          onClick={() => setOrdersOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.55)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            zIndex: 9999,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
             style={{
-              padding: "12px 10px",
-              borderRadius: 10,
-              border: "1px solid #ddd",
-              background: "green",
-              cursor: "pointer",
-              fontWeight: 800,
+              width: "min(900px, 100%)",
+              maxHeight: "80vh",
+              overflow: "auto",
+              background: "#0b1220",
+              border: "1px solid #374151",
+              borderRadius: 12,
+              padding: 16,
+              color: "white",
             }}
-            title={`Open /t/${t} in new tab`}
           >
-            Table {t}
-          </button>
-        ))}
-      </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: 18 }}>Orders — Table {ordersTableId}</div>
+                <div style={{ fontSize: 12, opacity: 0.75 }}>Latest 50 orders</div>
+              </div>
 
-      <div style={{ marginTop: 18, opacity: 0.75, fontSize: 13 }}>
-        URL: <code>/demo/tables</code>
-      </div>
+              <button
+                onClick={() => setOrdersOpen(false)}
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  backgroundColor: "#374151",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 6,
+                  fontWeight: 800,
+                }}
+              >
+                Close
+              </button>
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              {ordersLoading && <div style={{ opacity: 0.8 }}>Loading…</div>}
+              {ordersErr && <div style={{ color: "#f87171" }}>{ordersErr}</div>}
+
+              {!ordersLoading && !ordersErr && orders.length === 0 && (
+                <div style={{ opacity: 0.75 }}>No orders for this table yet.</div>
+              )}
+
+              {!ordersLoading && !ordersErr && orders.length > 0 && (
+                <div style={{ display: "grid", gap: 10 }}>
+                  {orders.map((o) => (
+                    <div
+                      key={o.id}
+                      style={{
+                        border: "1px solid #1f2937",
+                        borderRadius: 10,
+                        padding: 12,
+                        background: "#0f172a",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                        <div style={{ fontWeight: 900 }}>
+                          #{o.id.slice(0, 8)}…{" "}
+                          <span style={{ fontSize: 12, opacity: 0.75, fontWeight: 700 }}>({o.status})</span>
+                        </div>
+                        <div style={{ fontSize: 12, opacity: 0.75 }}>
+                          {new Date(o.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+
+                      <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+                        {o.items.map((it) => (
+                          <div
+                            key={it.id}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              gap: 10,
+                              fontSize: 14,
+                              borderTop: "1px dashed #1f2937",
+                              paddingTop: 6,
+                            }}
+                          >
+                            <div>
+                              <b>{it.qty}×</b> {it.name}
+                              {it.note ? <span style={{ opacity: 0.75 }}> — {it.note}</span> : null}
+                            </div>
+                            <div style={{ opacity: 0.85 }}>{(it.price * it.qty).toFixed(2)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

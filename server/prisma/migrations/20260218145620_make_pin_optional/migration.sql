@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Waiter" ALTER COLUMN "pin" DROP NOT NULL;
