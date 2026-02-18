@@ -38,7 +38,7 @@ export default function AdminHome() {
       </div>
 
       <div style={grid}>
-        <Link to="/demo/tables" style={card}>
+        <Link to="/admin/tables" style={card}>
           🪑 See Tables
           <div style={small}>View tables and open table pages (with token).</div>
         </Link>
@@ -48,7 +48,7 @@ export default function AdminHome() {
           <div style={small}>Add / disable / delete waiters.</div>
         </Link>
 
-        <Link to="/waiter-dashboard" style={card}>
+        <Link to="/waiter" style={card}>
           📺 Waiter Dashboard
           <div style={small}>Monitor orders + calls live.</div>
         </Link>

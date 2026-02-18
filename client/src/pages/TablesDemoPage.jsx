@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { adminFetch, isAdminLoggedIn } from "../adminAuth"; // adjust path if needed
 
 export default function TablesDemoPage() {
   const api = import.meta.env.VITE_API_URL;
+  const nav = useNavigate();
 
   const [tables, setTables] = useState([]);
   const [err, setErr] = useState("");
@@ -15,16 +18,15 @@ export default function TablesDemoPage() {
   const [orders, setOrders] = useState([]);
   const [ordersTableId, setOrdersTableId] = useState("");
 
-  const adminUser = import.meta.env.VITE_ADMIN_USER;
-  const adminPass = import.meta.env.VITE_ADMIN_PASS;
-  const adminAuth = "Basic " + btoa(`${adminUser}:${adminPass}`);
-
-
   async function loadTables() {
     setErr("");
     setLoading(true);
     try {
       const r = await adminFetch(`${api}/api/admin/tables`);
+      if (r.status === 401) {
+        nav("/admin");
+        return;
+      }
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       setTables(data);
@@ -35,17 +37,11 @@ export default function TablesDemoPage() {
     }
   }
 
-  function adminFetch(url, options = {}) {
-  return fetch(url, {
-    ...options,
-    headers: {
-      ...(options.headers || {}),
-      Authorization: adminAuth,
-    },
-  });
-}
-
   useEffect(() => {
+    if (!isAdminLoggedIn()) {
+      nav("/admin");
+      return;
+    }
     loadTables();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -53,6 +49,7 @@ export default function TablesDemoPage() {
   async function openTable(tableId) {
     setErr("");
     const r = await adminFetch(`${api}/api/admin/tables/${tableId}/scan-url`);
+    if (r.status === 401) return nav("/admin");
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
       setErr(j.error || "Failed to get scan url");
@@ -71,6 +68,7 @@ export default function TablesDemoPage() {
 
     try {
       const r = await adminFetch(`${api}/api/admin/tables/${tableId}/orders`);
+      if (r.status === 401) return nav("/admin");
       if (!r.ok) {
         const j = await r.json().catch(() => ({}));
         throw new Error(j.error || `HTTP ${r.status}`);
@@ -83,7 +81,6 @@ export default function TablesDemoPage() {
       setOrdersLoading(false);
     }
   }
-
 
   return (
     <div
@@ -146,7 +143,6 @@ export default function TablesDemoPage() {
                       borderRadius: 6,
                       fontWeight: 700,
                     }}
-                    title="Show orders for this table"
                   >
                     View Orders
                   </button>
@@ -284,7 +280,6 @@ export default function TablesDemoPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

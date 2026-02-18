@@ -6,6 +6,7 @@ import WaiterPersonalPage from "./pages/WaiterPersonalPage";
 import PickWaiter from "./pages/PickWaiter";
 import AdminWaitersPage from "./pages/AdminWaitersPage";
 import AdminHome from "./pages/AdminHome";
+import AdminLogin from "./pages/AdminLogin";
 
 
 
@@ -15,11 +16,12 @@ export default function App() {
     <Routes>
       <Route path="/t/:tableId" element={<TablePage />} />
       <Route path="/waiter" element={<WaiterPage />} />
-      <Route path="/demo/tables" element={<TablesDemoPage />} />
+      <Route path="/admin/tables" element={<TablesDemoPage />} />
       <Route path="/w/:waiterId" element={<WaiterPersonalPage />} />
       <Route path="/pick-waiter" element={<PickWaiter />} />
       <Route path="/admin/waiters" element={<AdminWaitersPage />} />
-      <Route path="/admin" element={<AdminHome />} />
+      <Route path="/admin/home" element={<AdminHome />} />
+      <Route path="/admin" element={<AdminLogin />} />
 
 <Route
   path="*"
