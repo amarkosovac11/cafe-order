@@ -89,12 +89,25 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => console.log("Socket disconnected:", socket.id));
 });
 
-/* ---------- Temporary menu (local file) ---------- */
-const menu = require("./data/menu");
 
-/* ---------- Health + Menu ---------- */
+
+/* ---------- Health + Menu (DB) ---------- */
 app.get("/health", (req, res) => res.json({ status: "ok" }));
-app.get("/menu", (req, res) => res.json(menu));
+
+app.get("/menu", async (req, res) => {
+  try {
+    const categories = await prisma.menuCategory.findMany({
+      include: { items: true },
+      orderBy: { name: "asc" },
+    });
+
+    res.json(categories);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Failed to load menu" });
+  }
+});
+
 
 /* =========================
    ORDERS (Prisma)

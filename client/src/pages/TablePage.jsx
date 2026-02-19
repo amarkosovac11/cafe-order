@@ -198,8 +198,43 @@ export default function TablePage() {
     }
   };
 
+  // Visual helpers (no logic change — only UI)
+  const categoryIcon = (name) => {
+    const n = String(name || "").toLowerCase();
+    if (n.includes("coffee") || n.includes("hot drinks")) return "☕";
+    if (n.includes("tea")) return "🍵";
+    if (n.includes("cold")) return "🧊";
+    if (n.includes("breakfast")) return "🍳";
+    if (n.includes("sandwich")) return "🥪";
+    if (n.includes("dessert")) return "🍰";
+    if (n.includes("pizza")) return "🍕";
+    if (n.includes("pasta")) return "🍝";
+    if (n.includes("burger")) return "🍔";
+    if (n.includes("salad")) return "🥗";
+    if (n.includes("soup")) return "🥣";
+    if (n.includes("seafood")) return "🦐";
+    if (n.includes("grill") || n.includes("main")) return "🔥";
+    if (n.includes("kids")) return "🧒";
+    if (n.includes("cocktail")) return "🍸";
+    if (n.includes("beer") || n.includes("wine") || n.includes("alcohol")) return "🍷";
+    if (n.includes("side")) return "🍟";
+    if (n.includes("starter")) return "✨";
+    return "🍽️";
+  };
+
+  const accentFromName = (name) => {
+    // Stable-ish hash -> HSL color (visual only)
+    const str = String(name || "");
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360;
+    // Keep within warm range for a premium feel
+    const hue = (h % 60) + 25; // 25..85
+    return `hsl(${hue} 70% 55%)`;
+  };
+
   return (
     <div className="tp-page">
+      <div className="tp-ambient" aria-hidden="true" />
       <div className="tp-shell">
         {/* Header */}
         <div className="tp-header">
@@ -213,9 +248,11 @@ export default function TablePage() {
 
           <div className="tp-headerActions">
             <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
+              <span className="tp-btnIcon" aria-hidden="true">🔔</span>
               Call waiter
             </button>
             <button onClick={requestBill} className="tp-btn tp-btn--secondary">
+              <span className="tp-btnIcon" aria-hidden="true">🧾</span>
               Request bill
             </button>
 
@@ -223,6 +260,7 @@ export default function TablePage() {
               onClick={() => setCartOpen(true)}
               className="tp-btn tp-btn--secondary tp-cartBtn"
             >
+              <span className="tp-btnIcon" aria-hidden="true">🛒</span>
               Cart
               <span className="tp-cartCount">{cartQty}</span>
             </button>
@@ -278,18 +316,32 @@ export default function TablePage() {
             )}
           </div>
 
-          {loading && <div className="tp-muted" style={{ padding: 14 }}>Loading…</div>}
+          {loading && (
+            <div className="tp-loading" style={{ padding: 14 }}>
+              <div className="tp-skeletonRow" />
+              <div className="tp-skeletonRow" />
+              <div className="tp-skeletonRow" />
+            </div>
+          )}
 
           {!loading && !selectedCategory && (
             <div className="tp-categoriesGrid">
               {categories.map((cat) => {
                 const count = menu.find((c) => c.name === cat)?.items?.length || 0;
+                const accent = accentFromName(cat);
                 return (
                   <button
                     key={cat}
                     className="tp-categoryCard"
                     onClick={() => setSelectedCategory(cat)}
+                    style={{ "--tp-accent": accent }}
                   >
+                    <div className="tp-categoryTop">
+                      {/* <div className="tp-categoryIcon" aria-hidden="true">
+                        {categoryIcon(cat)}
+                      </div> */}
+                      <div className="tp-categoryArrow" aria-hidden="true">→</div>
+                    </div>
                     <div className="tp-categoryName">{cat}</div>
                     <div className="tp-categoryMeta">{count} items</div>
                   </button>
@@ -312,6 +364,7 @@ export default function TablePage() {
                   <div className="tp-itemRight">
                     <div className="tp-price">{it.price.toFixed(2)} KM</div>
                     <button onClick={() => addItem(it)} className="tp-btn tp-btn--primary">
+                      <span className="tp-btnIcon" aria-hidden="true">＋</span>
                       Add
                     </button>
                   </div>
