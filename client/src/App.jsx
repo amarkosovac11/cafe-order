@@ -7,7 +7,7 @@ import PickWaiter from "./pages/PickWaiter";
 import AdminWaitersPage from "./pages/AdminWaitersPage";
 import AdminHome from "./pages/AdminHome";
 import AdminLogin from "./pages/AdminLogin";
-
+import AdminMenuPage from "./pages/AdminMenuPage";
 
 
 
@@ -22,6 +22,7 @@ export default function App() {
       <Route path="/admin/waiters" element={<AdminWaitersPage />} />
       <Route path="/admin/home" element={<AdminHome />} />
       <Route path="/admin" element={<AdminLogin />} />
+      <Route path="/admin/menu" element={<AdminMenuPage />} />
 
 <Route
   path="*"

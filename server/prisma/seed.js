@@ -3,74 +3,100 @@ const crypto = require("crypto");
 
 const prisma = new PrismaClient();
 
-// ✅ import your menu.js (adjust path if needed)
-const menu = require("../data/menu"); 
-// If your menu.js is not in prisma folder, you’ll change it like:
-// const menu = require("../src/menu");  OR  require("../menu");
+function tableToken() {
+  return crypto.randomBytes(16).toString("hex");
+}
 
-async function seedMenu() {
-  console.log("Seeding menu categories & items...");
+async function seedTables() {
+  for (let i = 1; i <= 12; i++) {
+    const id = String(i);
 
-  // (optional but recommended) clear existing menu so re-seed is clean
-  await prisma.menuItem.deleteMany({});
-  await prisma.menuCategory.deleteMany({});
+    const existing = await prisma.table.findUnique({ where: { id } });
+    if (existing) continue;
 
-  for (const cat of menu) {
-    const createdCat = await prisma.menuCategory.create({
-      data: { name: cat.name },
+    await prisma.table.create({
+      data: {
+        id,
+        name: `Table ${id}`,
+        token: tableToken(),
+        isActive: true,
+      },
     });
+  }
+  console.log("✅ Tables seeded (or already existed).");
+}
 
-    if (cat.items?.length) {
-      await prisma.menuItem.createMany({
-        data: cat.items.map((it) => ({
-          name: it.name,
-          price: it.price,
-          categoryId: createdCat.id,
-        })),
-      });
-    }
+async function seedWaiters() {
+  const waiters = [
+    { name: "Adnan", pin: "1111" },
+    { name: "Faris", pin: "2222" },
+    { name: "Davud", pin: "3333" },
+  ];
+
+  for (const w of waiters) {
+    const exists = await prisma.waiter.findUnique({ where: { pin: w.pin } });
+    if (exists) continue;
+
+    await prisma.waiter.create({
+      data: { name: w.name, pin: w.pin, isActive: true },
+    });
   }
 
-  console.log("✅ Seeded menu");
+  console.log("✅ Waiters seeded (or already existed).");
+}
+
+async function seedMenu() {
+  const count = await prisma.menuCategory.count();
+  if (count > 0) {
+    console.log("Menu already exists. Skipping menu seed.");
+    return;
+  }
+
+  const menu = [
+    {
+      name: "Coffee",
+      items: [
+        { name: "Espresso", price: 2.5 },
+        { name: "Americano", price: 2.8 },
+        { name: "Cappuccino", price: 3.0 },
+      ],
+    },
+    {
+      name: "Desserts",
+      items: [
+        { name: "Cheesecake", price: 4.0 },
+        { name: "Chocolate Cake", price: 4.5 },
+      ],
+    },
+    // dodaj ostale kategorije...
+  ];
+
+  for (const cat of menu) {
+    await prisma.menuCategory.create({
+      data: {
+        name: cat.name,
+        items: { create: cat.items },
+      },
+    });
+  }
+
+  console.log("✅ Menu seeded.");
 }
 
 async function main() {
-  console.log("DATABASE_URL =", process.env.DATABASE_URL);
-  console.log("Seeding waiters...");
-
-  await prisma.waiter.createMany({
-    data: [
-      { name: "Adnan", pin: "1111", isActive: true },
-      { name: "Davud", pin: "2222", isActive: true },
-      { name: "Faris", pin: "3333", isActive: true },
-    ],
-    skipDuplicates: true,
-  });
-
-  console.log("Seeding tables...");
-
-  const tables = Array.from({ length: 10 }, (_, i) => ({
-    id: `t${i + 1}`,
-    name: `Table ${i + 1}`,
-    token: crypto.randomUUID(),
-    isActive: true,
-  }));
-
-  await prisma.table.createMany({
-    data: tables,
-    skipDuplicates: true,
-  });
-
-  // ✅ NEW
+  /* console.log("🌱 Seeding DB...");
+  await seedTables();
+  await seedWaiters();
   await seedMenu();
-
-  console.log("✅ Seeded waiters, tables, and menu");
+  console.log("🌱 Done."); */
+  console.log("🌱 Seeding disabled (production).");
 }
 
 main()
-  .finally(async () => await prisma.$disconnect())
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });

@@ -1,23 +1,10 @@
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: cafe_order
-    ports:
-    - "5433:5432"
-    volumes:
-      - cafe_pgdata:/var/lib/postgresql/data
-
   server:
     build: ./server
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/cafe_order?schema=public
+      DATABASE_URL: postgresql://postgres:123@host.docker.internal:5432/cafe_order?schema=public
       PORT: 4000
       CLIENT_ORIGIN: http://localhost:5173
-    depends_on:
-      - db
     ports:
       - "4000:4000"
 
@@ -29,6 +16,3 @@ services:
       - server
     ports:
       - "5173:5173"
-
-volumes:
-  cafe_pgdata:

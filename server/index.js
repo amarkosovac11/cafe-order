@@ -94,17 +94,164 @@ io.on("connection", (socket) => {
 /* ---------- Health + Menu (DB) ---------- */
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
+
 app.get("/menu", async (req, res) => {
   try {
-    const categories = await prisma.menuCategory.findMany({
-      include: { items: true },
+    const menu = await prisma.menuCategory.findMany({
       orderBy: { name: "asc" },
+      include: { items: { orderBy: { name: "asc" } } },
+    });
+    res.json(menu);
+  } catch (e) {
+    console.error("GET /menu failed:", e);
+    res.status(500).json({ error: "Failed to load menu" });
+  }
+});
+// ✅ Create Menu Category
+app.post("/menu-category", requireAdmin, async (req, res) => {
+  try {
+    const name = String(req.body?.name || "").trim();
+    if (!name) return res.status(400).json({ error: "Name is required" });
+
+    const created = await prisma.menuCategory.create({
+      data: { name },
     });
 
-    res.json(categories);
+    res.status(201).json(created);
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to load menu" });
+    // Prisma unique constraint violation
+    if (e.code === "P2002") {
+      return res.status(409).json({ error: "Category already exists" });
+    }
+    console.error("POST /menu-category failed:", e);
+    res.status(500).json({ error: "Failed to create category" });
+  }
+});
+
+app.put("/menu-category/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = String(req.params.id);
+    const name = String(req.body?.name || "").trim();
+    if (!name) return res.status(400).json({ error: "Name is required" });
+
+    const updated = await prisma.menuCategory.update({
+      where: { id },
+      data: { name },
+    });
+
+    res.json(updated);
+  } catch (e) {
+    if (e.code === "P2002") return res.status(409).json({ error: "Category name already exists" });
+    if (e.code === "P2025") return res.status(404).json({ error: "Category not found" });
+
+    console.error("PUT /menu-category/:id failed:", e);
+    res.status(500).json({ error: "Failed to update category" });
+  }
+});
+
+app.delete("/menu-category/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = String(req.params.id);
+
+    await prisma.menuCategory.delete({ where: { id } });
+
+    res.json({ ok: true });
+  } catch (e) {
+    if (e.code === "P2025") return res.status(404).json({ error: "Category not found" });
+
+    console.error("DELETE /menu-category/:id failed:", e);
+    res.status(500).json({ error: "Failed to delete category" });
+  }
+});
+
+// ✅ Create Menu Item
+app.post("/menu-item", requireAdmin, async (req, res) => {
+  try {
+    const name = String(req.body?.name || "").trim();
+    const categoryId = String(req.body?.categoryId || "").trim();
+    const priceRaw = req.body?.price;
+
+    const price = Number(priceRaw);
+
+    if (!name) return res.status(400).json({ error: "Name is required" });
+    if (!categoryId) return res.status(400).json({ error: "categoryId is required" });
+    if (!Number.isFinite(price) || price <= 0) {
+      return res.status(400).json({ error: "Price must be a number > 0" });
+    }
+
+    // Ensure category exists (better error message)
+    const cat = await prisma.menuCategory.findUnique({ where: { id: categoryId } });
+    if (!cat) return res.status(404).json({ error: "Category not found" });
+
+    const created = await prisma.menuItem.create({
+      data: { name, price, categoryId },
+    });
+
+    res.status(201).json(created);
+  } catch (e) {
+    console.error("POST /menu-item failed:", e);
+    res.status(500).json({ error: "Failed to create item" });
+  }
+});
+
+// ✅ Update Menu Item
+app.put("/menu-item/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = String(req.params.id);
+    const name = req.body?.name !== undefined ? String(req.body.name).trim() : undefined;
+    const price = req.body?.price !== undefined ? Number(req.body.price) : undefined;
+    const categoryId =
+      req.body?.categoryId !== undefined ? String(req.body.categoryId).trim() : undefined;
+
+    const data = {};
+
+    if (name !== undefined) {
+      if (!name) return res.status(400).json({ error: "Name cannot be empty" });
+      data.name = name;
+    }
+
+    if (price !== undefined) {
+      if (!Number.isFinite(price) || price <= 0) {
+        return res.status(400).json({ error: "Price must be a number > 0" });
+      }
+      data.price = price;
+    }
+
+    if (categoryId !== undefined) {
+      if (!categoryId) return res.status(400).json({ error: "categoryId cannot be empty" });
+      const cat = await prisma.menuCategory.findUnique({ where: { id: categoryId } });
+      if (!cat) return res.status(404).json({ error: "Category not found" });
+      data.categoryId = categoryId;
+    }
+
+    const updated = await prisma.menuItem.update({
+      where: { id },
+      data,
+    });
+
+    res.json(updated);
+  } catch (e) {
+    // Prisma record not found
+    if (e.code === "P2025") return res.status(404).json({ error: "Item not found" });
+
+    console.error("PUT /menu-item/:id failed:", e);
+    res.status(500).json({ error: "Failed to update item" });
+  }
+});
+
+// ✅ Delete Menu Item
+app.delete("/menu-item/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = String(req.params.id);
+
+    await prisma.menuItem.delete({ where: { id } });
+
+    res.json({ ok: true });
+  } catch (e) {
+    if (e.code === "P2025") return res.status(404).json({ error: "Item not found" });
+
+    console.error("DELETE /menu-item/:id failed:", e);
+    res.status(500).json({ error: "Failed to delete item" });
   }
 });
 

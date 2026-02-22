@@ -26,9 +26,15 @@ export default function AdminLogin() {
 
       if (!r.ok) throw new Error("Wrong username or password");
 
+      // ✅ keep it for this session + future refresh
       setAdminAuth(auth);
+      localStorage.setItem("adminAuth", auth);
+
       nav("/admin/home");
     } catch (e2) {
+      // ✅ if login fails, remove any old auth
+      localStorage.removeItem("adminAuth");
+      setAdminAuth("");
       setErr(e2.message || "Login failed");
     } finally {
       setLoading(false);

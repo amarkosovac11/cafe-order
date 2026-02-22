@@ -53,6 +53,13 @@ export default function AdminHome() {
           <div style={small}>Monitor orders + calls live.</div>
         </Link>
 
+        <Link to="/admin/menu" style={card}>
+          📋 Manage Menu
+          <div style={small}>
+            Add / edit / delete categories and menu items.
+          </div>
+        </Link>
+
         {/* Optional debug link (not recommended for real use) */}
         {/*
         <Link to="/waiter" style={card}>
