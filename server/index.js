@@ -24,8 +24,17 @@ app.use(
 );
 app.use(express.json());
 
-console.log("ADMIN_USER =", process.env.ADMIN_USER);
-console.log("ADMIN_PASS set?", Boolean(process.env.ADMIN_PASS));
+/* console.log("ADMIN_USER =", process.env.ADMIN_USER);
+console.log("ADMIN_PASS set?", Boolean(process.env.ADMIN_PASS)); */
+
+
+app.get("/debug/env", (req, res) => {
+  // SAFE: we do NOT return the password, only whether it exists
+  res.json({
+    ADMIN_USER: process.env.ADMIN_USER ?? null,
+    ADMIN_PASS_SET: Boolean(process.env.ADMIN_PASS),
+  });
+});
 
 async function requireValidTable(req, res, next) {
   try {
