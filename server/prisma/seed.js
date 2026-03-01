@@ -3,8 +3,30 @@ const crypto = require("crypto");
 
 const prisma = new PrismaClient();
 
-function tableToken() {
-  return crypto.randomBytes(16).toString("hex");
+function tableToken(id) {
+  return crypto
+    .createHash("sha256")
+    .update(`table-${id}-dev-secret`)
+    .digest("hex")
+    .slice(0, 32);
+}
+
+async function resetDevData() {
+  const reset = (process.env.SEED_RESET ?? "false").toLowerCase() === "true";
+  if (!reset) return;
+
+  console.log("🧹 SEED_RESET=true -> clearing tables...");
+
+  // Clear in FK-safe order
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.call.deleteMany();
+  await prisma.menuItem.deleteMany();
+  await prisma.menuCategory.deleteMany();
+  await prisma.table.deleteMany();
+  await prisma.waiter.deleteMany();
+
+  console.log("🧹 Clear done.");
 }
 
 async function seedTables() {
@@ -18,7 +40,7 @@ async function seedTables() {
       data: {
         id,
         name: `Table ${id}`,
-        token: tableToken(),
+        token: tableToken(id),
         isActive: true,
       },
     });
@@ -84,12 +106,20 @@ async function seedMenu() {
 }
 
 async function main() {
-  /* console.log("🌱 Seeding DB...");
+  console.log("🌱 Seeding DB...");
+
+  const enabled = (process.env.SEED_ENABLED ?? "true").toLowerCase() === "true";
+  if (!enabled) {
+    console.log("🌱 Seeding disabled (SEED_ENABLED=false).");
+    return;
+  }
+
+  await resetDevData();
   await seedTables();
   await seedWaiters();
   await seedMenu();
-  console.log("🌱 Done."); */
-  console.log("🌱 Seeding disabled (production).");
+
+  console.log("✅ Seed done.");
 }
 
 main()
