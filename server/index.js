@@ -24,6 +24,9 @@ app.use(
 );
 app.use(express.json());
 
+console.log("ADMIN_USER =", process.env.ADMIN_USER);
+console.log("ADMIN_PASS set?", Boolean(process.env.ADMIN_PASS));
+
 async function requireValidTable(req, res, next) {
   try {
     const tableId = String(req.body.tableId || req.params.tableId || "");
