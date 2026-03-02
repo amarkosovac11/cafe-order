@@ -70,7 +70,7 @@ async function seedWaiters() {
 async function seedMenu() {
   console.log("🌱 Seeding menu (upsert mode)...");
 
-    const menu = [
+  const menu = [
     {
       name: "Coffee",
       items: [
@@ -294,12 +294,29 @@ async function seedMenu() {
   ];
 
   for (const cat of menu) {
-    await prisma.menuCategory.create({
-      data: {
-        name: cat.name,
-        items: { create: cat.items },
-      },
+    // create category if missing
+    const category = await prisma.menuCategory.upsert({
+      where: { name: cat.name },
+      update: {},
+      create: { name: cat.name },
     });
+
+    // create items if missing
+    for (const it of cat.items) {
+      const exists = await prisma.menuItem.findFirst({
+        where: { categoryId: category.id, name: it.name },
+      });
+
+      if (!exists) {
+        await prisma.menuItem.create({
+          data: {
+            name: it.name,
+            price: it.price,
+            categoryId: category.id,
+          },
+        });
+      }
+    }
   }
 
   for (const cat of menu) {
