@@ -68,13 +68,9 @@ async function seedWaiters() {
 }
 
 async function seedMenu() {
-  const count = await prisma.menuCategory.count();
-  if (count > 0) {
-    console.log("Menu already exists. Skipping menu seed.");
-    return;
-  }
+  console.log("🌱 Seeding menu (upsert mode)...");
 
-  const menu = [
+    const menu = [
     {
       name: "Coffee",
       items: [
@@ -306,8 +302,36 @@ async function seedMenu() {
     });
   }
 
-  console.log("✅ Menu seeded.");
+  for (const cat of menu) {
+    const category = await prisma.menuCategory.upsert({
+      where: { name: cat.name },
+      update: {},
+      create: { name: cat.name },
+    });
+
+    for (const it of cat.items) {
+      const exists = await prisma.menuItem.findFirst({
+        where: { categoryId: category.id, name: it.name },
+      });
+
+      if (!exists) {
+        await prisma.menuItem.create({
+          data: {
+            name: it.name,
+            price: it.price,
+            categoryId: category.id,
+          },
+        });
+      }
+    }
+  }
+
+  console.log("✅ Menu seeded safely.");
 }
+
+
+
+
 
 async function main() {
   console.log("🌱 Seeding DB...");

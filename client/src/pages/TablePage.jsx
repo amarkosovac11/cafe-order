@@ -199,7 +199,7 @@ export default function TablePage() {
   };
 
   // Visual helpers (no logic change — only UI)
-  const categoryIcon = (name) => {
+ /*  const categoryIcon = (name) => {
     const n = String(name || "").toLowerCase();
     if (n.includes("coffee") || n.includes("hot drinks")) return "☕";
     if (n.includes("tea")) return "🍵";
@@ -220,7 +220,7 @@ export default function TablePage() {
     if (n.includes("side")) return "🍟";
     if (n.includes("starter")) return "✨";
     return "🍽️";
-  };
+  }; */
 
   const accentFromName = (name) => {
     // Stable-ish hash -> HSL color (visual only)
