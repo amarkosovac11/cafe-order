@@ -1,73 +1,67 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { isAdminLoggedIn } from "../adminAuth"; // adjust path if needed
+import { isAdminLoggedIn } from "../adminAuth";
+import "../css/AdminHome.css";
 
 export default function AdminHome() {
   const nav = useNavigate();
 
   useEffect(() => {
-    if (!isAdminLoggedIn()) {
-      nav("/admin");
-      return;
-    }
+    if (!isAdminLoggedIn()) nav("/admin");
   }, [nav]);
 
-  const wrap = {
-    maxWidth: 900,
-    margin: "40px auto",
-    padding: 20,
-    color: "white",
-    background: "#111827",
-    borderRadius: 12,
-  };
-
-  const grid = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: 12,
-    marginTop: 14,
-  };
-
-  const card = {
-    display: "block",
-    padding: 16,
-    borderRadius: 10,
-    textDecoration: "none",
-    color: "white",
-    background: "#1f2937",
-    border: "1px solid #374151",
-    fontWeight: 700,
-  };
-
-  const small = { fontSize: 12, opacity: 0.75, marginTop: 6, fontWeight: 500 };
-
   return (
-    <div style={wrap}>
-      <h1 style={{ margin: 0 }}>Admin Panel</h1>
-      <div style={{ opacity: 0.75, marginTop: 6 }}>
-        Tables overview + manage waiters.
-      </div>
+    <div className="adminHomePage">
+      <div className="adminHomeWrap">
+        <div className="adminHomeHeader">
+          <div>
+            <h1 className="adminHomeTitle">Admin Panel</h1>
+            <p className="adminHomeSubtitle">Tables overview + manage waiters.</p>
+          </div>
 
-      <div style={grid}>
-        <Link to="/admin/tables" style={card}>
-          🪑 See Tables
-          <div style={small}>View tables and open table pages (with token).</div>
-        </Link>
+          {/* Optional: quick action button */}
+          <Link className="adminHomeBtn" to="/waiter">
+            Open Dashboard
+          </Link>
+        </div>
 
-        <Link to="/admin/waiters" style={card}>
-          🧑‍🍳 Manage Waiters
-          <div style={small}>Add / disable / delete waiters.</div>
-        </Link>
+        <div className="adminHomeGrid">
+          <Link to="/admin/tables" className="adminHomeCard">
+            <div className="adminHomeCardTop">
+              <span className="adminHomeIcon">🪑</span>
+              <span className="adminHomeCardTitle">See Tables</span>
+            </div>
+            <div className="adminHomeCardDesc">
+              View tables and open table pages (with token).
+            </div>
+          </Link>
 
-        <Link to="/waiter" style={card}>
-          📺 Waiter Dashboard
-          <div style={small}>Monitor orders + calls live.</div>
-        </Link>
+          <Link to="/admin/waiters" className="adminHomeCard">
+            <div className="adminHomeCardTop">
+              <span className="adminHomeIcon">🧑‍🍳</span>
+              <span className="adminHomeCardTitle">Manage Waiters</span>
+            </div>
+            <div className="adminHomeCardDesc">Add / disable / delete waiters.</div>
+          </Link>
 
-        <Link to="/admin/menu" style={card}>
-          📋 Manage Menu
-          <div style={small}>Add / edit / delete categories and menu items.</div>
-        </Link>
+          <Link to="/waiter" className="adminHomeCard">
+            <div className="adminHomeCardTop">
+              <span className="adminHomeIcon">📺</span>
+              <span className="adminHomeCardTitle">Waiter Dashboard</span>
+            </div>
+            <div className="adminHomeCardDesc">Monitor orders + calls live.</div>
+          </Link>
+
+          <Link to="/admin/menu" className="adminHomeCard">
+            <div className="adminHomeCardTop">
+              <span className="adminHomeIcon">📋</span>
+              <span className="adminHomeCardTitle">Manage Menu</span>
+            </div>
+            <div className="adminHomeCardDesc">
+              Add / edit / delete categories and menu items.
+            </div>
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,124 @@
+.adminHomePage {
+  min-height: 100vh;
+  padding: 16px;
+  color: white;
+  background: radial-gradient(1000px 500px at 20% 0%, rgba(56, 189, 248, 0.15), transparent 60%),
+    radial-gradient(900px 500px at 80% 20%, rgba(167, 139, 250, 0.15), transparent 60%),
+    #0b1220;
+  display: flex;
+  justify-content: center;
+}
+
+.adminHomeWrap {
+  width: 100%;
+  max-width: 980px;
+  background: rgba(17, 24, 39, 0.85);
+  border: 1px solid rgba(55, 65, 81, 0.7);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.adminHomeHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.adminHomeTitle {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.2px;
+}
+
+.adminHomeSubtitle {
+  margin: 6px 0 0 0;
+  opacity: 0.75;
+  font-size: 13px;
+}
+
+.adminHomeBtn {
+  text-decoration: none;
+  color: white;
+  background: rgba(59, 130, 246, 0.85);
+  border: 1px solid rgba(59, 130, 246, 1);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.adminHomeBtn:active {
+  transform: scale(0.98);
+}
+
+.adminHomeGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.adminHomeCard {
+  display: block;
+  text-decoration: none;
+  color: white;
+  background: rgba(31, 41, 55, 0.75);
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  border-radius: 14px;
+  padding: 14px;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.adminHomeCardTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adminHomeIcon {
+  font-size: 20px;
+}
+
+.adminHomeCardTitle {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.adminHomeCardDesc {
+  margin-top: 8px;
+  font-size: 13px;
+  opacity: 0.78;
+  line-height: 1.35;
+}
+
+/* Better tap feedback on phones */
+.adminHomeCard:active {
+  transform: scale(0.99);
+  border-color: rgba(99, 102, 241, 0.9);
+}
+
+/* Tablet+ */
+@media (min-width: 640px) {
+  .adminHomeWrap {
+    padding: 20px;
+  }
+
+  .adminHomeTitle {
+    font-size: 26px;
+  }
+
+  .adminHomeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .adminHomeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

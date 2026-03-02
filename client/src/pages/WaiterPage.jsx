@@ -457,7 +457,7 @@ export default function WaiterPage() {
                         <div className="wp-meta">Order ID: {o.id}</div>
                       </div>
 
-                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <div className="wp-cardBtns">
                         <button onClick={() => finishOrder(o.id)} className="wp-btn wp-btn--success">
                           Done
                         </button>

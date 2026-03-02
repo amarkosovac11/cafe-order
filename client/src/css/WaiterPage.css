@@ -1,5 +1,6 @@
 /* ===========================
    WaiterPage.css (Cafe Theme)
+   Full rewrite (mobile-first)
    =========================== */
 
 :root{
@@ -24,6 +25,9 @@
   --wp-font:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
 }
 
+/* ===========================
+   Page
+   =========================== */
 .wp-page{
   min-height:100vh;
   font-family:var(--wp-font);
@@ -32,7 +36,7 @@
     radial-gradient(1200px 700px at 20% 10%, rgba(215,168,110,0.18), transparent 55%),
     radial-gradient(900px 500px at 80% 0%, rgba(255,255,255,0.08), transparent 60%),
     linear-gradient(180deg, #0b0f14 0%, #070a0e 100%);
-  padding:22px 14px 36px;
+  padding:18px 14px 34px;
 }
 
 .wp-shell{
@@ -40,13 +44,25 @@
   margin:0 auto;
 }
 
-/* Top bar */
+/* ===========================
+   Top bar (mobile-first)
+   =========================== */
 .wp-top{
+  /* On mobile we remove sticky (it makes it feel tight while scrolling) */
+  position: relative;
+  top: auto;
+  z-index: 20;
+
   display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:14px;
-  padding:14px 12px 6px;
+  flex-direction: column;
+  gap:18px;
+
+  padding:22px 18px;
+  border:1px solid var(--wp-border);
+  background:rgba(11, 15, 20, 0.72);
+  backdrop-filter:blur(10px);
+  border-radius:var(--wp-radius);
+  box-shadow:var(--wp-shadow-soft);
 }
 
 .wp-titleRow{
@@ -58,40 +74,59 @@
 
 .wp-title{
   margin:0;
-  font-size:34px;
-  line-height:1.05;
+  font-size:26px;
+  line-height:1.25;
   letter-spacing:-0.02em;
 }
 
+.wp-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:var(--wp-muted);
+  border:1px solid rgba(255,255,255,0.14);
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.04);
+}
+
+/* On phones: stack actions for big tap targets */
 .wp-actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:8px;
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:12px;
 }
 
 .wp-right{
-  display:flex;
-  align-items:center;
+  display:grid;
+  grid-template-columns: 1fr;
   gap:10px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
+
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,0.08);
 }
 
 .wp-label{
   color:var(--wp-muted);
-  font-weight:800;
-  font-size:13px;
+  font-weight:900;
+  font-size:12px;
 }
 
 .wp-select{
-  padding:10px 12px;
-  border-radius:14px;
+  width:100%;
+  padding:14px 14px;
+  border-radius:16px;
   border:1px solid rgba(255,255,255,0.16);
   background:rgba(255,255,255,0.06);
   color:var(--wp-text);
-  font-weight:850;
+  font-weight:900;
   outline:none;
+}
+
+.wp-select:focus{
+  border-color: rgba(215,168,110,0.55);
+  box-shadow: 0 0 0 4px rgba(215,168,110,0.12);
 }
 
 .wp-select option{
@@ -100,12 +135,15 @@
 
 .wp-waiterName{
   color:var(--wp-muted);
-  font-weight:800;
+  font-weight:900;
+  font-size:13px;
 }
 
-/* Alerts */
+/* ===========================
+   Alerts
+   =========================== */
 .wp-alert{
-  margin:14px 12px 0;
+  margin:14px 0 0;
   border:1px solid var(--wp-border);
   background:var(--wp-surface);
   backdrop-filter:blur(10px);
@@ -136,15 +174,17 @@
   white-space:pre-wrap;
 }
 
-/* Sections */
+/* ===========================
+   Sections
+   =========================== */
 .wp-section{
-  margin-top:18px;
-  padding:0 12px;
+  margin-top:16px;
+  padding:0;
 }
 
 .wp-h2{
   margin:0 0 8px;
-  font-size:18px;
+  font-size:16px;
   letter-spacing:-0.01em;
 }
 
@@ -152,20 +192,21 @@
   margin:0 0 10px;
   color:var(--wp-muted);
   font-size:13px;
+  line-height:1.4;
 }
 
+/* ===========================
+   Grid
+   =========================== */
 .wp-grid{
   display:grid;
   gap:12px;
+  grid-template-columns: 1fr; /* mobile */
 }
 
-@media (min-width: 980px){
-  .wp-grid--two{
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Cards */
+/* ===========================
+   Cards
+   =========================== */
 .wp-card{
   border:1px solid var(--wp-border);
   background:var(--wp-surface);
@@ -189,6 +230,7 @@
 .wp-cardTitle{
   font-weight:950;
   letter-spacing:-0.01em;
+  font-size:14px;
 }
 
 .wp-meta{
@@ -203,17 +245,20 @@
   border-top:1px solid rgba(255,255,255,0.08);
   padding-top:10px;
   display:grid;
-  gap:8px;
+  gap:10px;
 }
 
+/* Better for phones: stable columns */
 .wp-itemRow{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:10px;
+  align-items:start;
 }
 
 .wp-itemName{
   font-weight:900;
+  font-size:13px;
 }
 
 .wp-note{
@@ -222,15 +267,17 @@
   margin-top:3px;
 }
 
-/* Buttons */
+/* ===========================
+   Buttons
+   =========================== */
 .wp-btn{
   border:1px solid rgba(255,255,255,0.14);
   background:rgba(255,255,255,0.06);
   color:var(--wp-text);
-  padding:10px 12px;
-  border-radius:14px;
+  padding:14px 14px;              /* bigger tap target */
+  border-radius:16px;
   cursor:pointer;
-  font-weight:850;
+  font-weight:900;
   transition:transform 120ms ease, background 120ms ease, border-color 120ms ease, opacity 120ms ease;
   user-select:none;
 }
@@ -238,6 +285,10 @@
 .wp-btn:hover{
   transform:translateY(-1px);
   background:rgba(255,255,255,0.09);
+}
+
+.wp-btn:active{
+  transform: scale(0.99);
 }
 
 .wp-btn:disabled{
@@ -267,15 +318,96 @@
   background:rgba(255,255,255,0.06);
 }
 
-/* Little badge/pill */
-.wp-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  font-size:12px;
-  color:var(--wp-muted);
-  border:1px solid rgba(255,255,255,0.14);
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(255,255,255,0.04);
+/* If you replaced inline style with className="wp-cardBtns" */
+.wp-cardBtns{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.wp-cardBtns .wp-btn{
+  min-width:120px;
+}
+
+/* ===========================
+   Tablet+
+   =========================== */
+@media (min-width: 640px){
+  .wp-page{
+    padding:22px 16px 38px;
+  }
+
+  /* On bigger screens sticky is nice */
+  .wp-top{
+    position: sticky;
+    top: 12px;
+
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap:16px;
+    padding:24px 22px;
+  }
+
+  .wp-title{
+    font-size:34px;
+    line-height:1.12;
+  }
+
+  /* Buttons back to row */
+  .wp-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+
+  /* Right area back to inline layout */
+  .wp-right{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+    flex-wrap:wrap;
+
+    border-top:none;
+    padding-top:0;
+    min-width:260px;
+  }
+
+  .wp-select{
+    width:auto;
+    padding:12px 12px;
+    border-radius:14px;
+  }
+
+  .wp-btn{
+    padding:12px 12px;
+    border-radius:14px;
+  }
+
+  .wp-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wp-section{
+    padding:0 6px;
+  }
+}
+
+/* ===========================
+   Desktop
+   =========================== */
+@media (min-width: 1024px){
+  .wp-grid{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ===========================
+   Tiny screens
+   =========================== */
+@media (max-width: 360px){
+  .wp-title{ font-size: 22px; }
 }
