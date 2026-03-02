@@ -57,6 +57,16 @@ export default function TablePage() {
     [cartItems]
   );
 
+  const [toast, setToast] = useState({ open: false, text: "" });
+
+  const showToast = (text) => {
+    setToast({ open: true, text });
+    window.clearTimeout(showToast._t);
+    showToast._t = window.setTimeout(() => {
+      setToast({ open: false, text: "" });
+    }, 1500);
+  };
+
   const hasItems = cartItems.length > 0;
 
   const addItem = (it) => {
@@ -64,8 +74,8 @@ export default function TablePage() {
     setErr("");
     setCallMsg("");
 
-    // Optional nice UX: open cart when user adds first item
-    setCartOpen(true);
+    // ✅ toast instead of opening cart
+    showToast(`Added “${it.name}” ✅`);
 
     setCart((prev) => {
       const existing = prev[it.id];
@@ -199,28 +209,28 @@ export default function TablePage() {
   };
 
   // Visual helpers (no logic change — only UI)
- /*  const categoryIcon = (name) => {
-    const n = String(name || "").toLowerCase();
-    if (n.includes("coffee") || n.includes("hot drinks")) return "☕";
-    if (n.includes("tea")) return "🍵";
-    if (n.includes("cold")) return "🧊";
-    if (n.includes("breakfast")) return "🍳";
-    if (n.includes("sandwich")) return "🥪";
-    if (n.includes("dessert")) return "🍰";
-    if (n.includes("pizza")) return "🍕";
-    if (n.includes("pasta")) return "🍝";
-    if (n.includes("burger")) return "🍔";
-    if (n.includes("salad")) return "🥗";
-    if (n.includes("soup")) return "🥣";
-    if (n.includes("seafood")) return "🦐";
-    if (n.includes("grill") || n.includes("main")) return "🔥";
-    if (n.includes("kids")) return "🧒";
-    if (n.includes("cocktail")) return "🍸";
-    if (n.includes("beer") || n.includes("wine") || n.includes("alcohol")) return "🍷";
-    if (n.includes("side")) return "🍟";
-    if (n.includes("starter")) return "✨";
-    return "🍽️";
-  }; */
+  /*  const categoryIcon = (name) => {
+     const n = String(name || "").toLowerCase();
+     if (n.includes("coffee") || n.includes("hot drinks")) return "☕";
+     if (n.includes("tea")) return "🍵";
+     if (n.includes("cold")) return "🧊";
+     if (n.includes("breakfast")) return "🍳";
+     if (n.includes("sandwich")) return "🥪";
+     if (n.includes("dessert")) return "🍰";
+     if (n.includes("pizza")) return "🍕";
+     if (n.includes("pasta")) return "🍝";
+     if (n.includes("burger")) return "🍔";
+     if (n.includes("salad")) return "🥗";
+     if (n.includes("soup")) return "🥣";
+     if (n.includes("seafood")) return "🦐";
+     if (n.includes("grill") || n.includes("main")) return "🔥";
+     if (n.includes("kids")) return "🧒";
+     if (n.includes("cocktail")) return "🍸";
+     if (n.includes("beer") || n.includes("wine") || n.includes("alcohol")) return "🍷";
+     if (n.includes("side")) return "🍟";
+     if (n.includes("starter")) return "✨";
+     return "🍽️";
+   }; */
 
   const accentFromName = (name) => {
     // Stable-ish hash -> HSL color (visual only)
@@ -266,6 +276,12 @@ export default function TablePage() {
             </button>
           </div>
         </div>
+
+        {toast.open && (
+          <div className="tp-toast" role="status" aria-live="polite">
+            {toast.text}
+          </div>
+        )}
 
         {/* Alerts */}
         <div className="tp-alerts">
