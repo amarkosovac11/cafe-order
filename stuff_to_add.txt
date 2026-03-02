@@ -1,2 +1,0 @@
-- biranje jezika
-- fix na adminu manage waiters -> open personal ne radi
