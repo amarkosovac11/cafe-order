@@ -145,7 +145,7 @@ export default function AdminWaitersPage() {
           <WaiterRow
             key={w.id}
             w={w}
-            onOpenPersonal={() => nav(`/waiter/${w.id}`)}
+            onOpenPersonal={() => nav(`/w/${w.id}`)}
             onToggle={() => toggleActive(w)}
             onDelete={() => removeWaiter(w)}
           />

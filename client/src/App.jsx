@@ -47,8 +47,8 @@ export default function App() {
           marginBottom: "30px",
         }}
       >
-        Kaki MMA samo bareknuckle gole šake!
-      </h1>
+{/*         Kaki MMA samo bareknuckle gole šake!
+ */}      </h1>
 
       <img
         src="/images/mma.jpg"
