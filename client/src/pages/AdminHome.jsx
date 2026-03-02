@@ -1,6 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { isAdminLoggedIn } from "../adminAuth"; // adjust path if needed
 
 export default function AdminHome() {
+  const nav = useNavigate();
+
+  useEffect(() => {
+    if (!isAdminLoggedIn()) {
+      nav("/admin");
+      return;
+    }
+  }, [nav]);
+
   const wrap = {
     maxWidth: 900,
     margin: "40px auto",
@@ -55,18 +66,8 @@ export default function AdminHome() {
 
         <Link to="/admin/menu" style={card}>
           📋 Manage Menu
-          <div style={small}>
-            Add / edit / delete categories and menu items.
-          </div>
+          <div style={small}>Add / edit / delete categories and menu items.</div>
         </Link>
-
-        {/* Optional debug link (not recommended for real use) */}
-        {/*
-        <Link to="/waiter" style={card}>
-          🧪 Debug: Open Waiter Pages
-          <div style={small}>Pick a waiter and open personal page.</div>
-        </Link>
-        */}
       </div>
     </div>
   );
