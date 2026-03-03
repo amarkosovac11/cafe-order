@@ -1,3 +1,4 @@
 node_modules
 .env
 stuff_to_add.txt
+server/public/qrcodes/
