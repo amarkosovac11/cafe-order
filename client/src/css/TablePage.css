@@ -42,6 +42,7 @@
   box-sizing: border-box;
 }
 
+
 /* Page background (subtle texture, less “digital glow”) */
 .tp-page {
   min-height: 100vh;
@@ -598,5 +599,133 @@
   .tp-btn {
     padding: 9px 11px;
     border-radius: 12px;
+  }
+}
+
+/* Big mobile back button */
+.tp-backButton {
+  width: 100%;
+  margin: 10px 12px 4px;
+
+  padding: 14px 16px;
+  border-radius: 14px;
+
+  font-size: 16px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+
+  background: rgba(199, 161, 106, 0.18);
+  border: 1px solid rgba(199, 161, 106, 0.5);
+  color: var(--tp-text);
+
+  cursor: pointer;
+}
+
+.tp-backButton:hover {
+  background: rgba(199, 161, 106, 0.25);
+}
+
+/* ===========================
+   Responsive improvements
+   =========================== */
+
+/* Phone */
+@media (max-width: 520px) {
+  .tp-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .tp-headerActions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* Cart spans full width (more important) */
+  .tp-cartBtn {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .tp-h1 {
+    font-size: 26px;
+  }
+}
+
+/* Tablet */
+@media (min-width: 521px) and (max-width: 980px) {
+  .tp-header {
+    align-items: flex-start;
+  }
+
+  .tp-headerActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .tp-cartBtn {
+    justify-content: center;
+  }
+}
+
+/* Big back button responsiveness */
+.tp-backButton {
+  max-width: 720px;
+  /* looks premium on tablets */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 420px) {
+  .tp-backButton {
+    font-size: 15px;
+    padding: 14px 14px;
+    border-radius: 14px;
+  }
+}
+
+@media (min-width: 421px) and (max-width: 980px) {
+  .tp-backButton {
+    font-size: 16px;
+    padding: 15px 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .tp-menuItem {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tp-itemRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .tp-btn--primary {
+    min-height: 44px;
+    /* mobile tap size */
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .tp-drawer {
+    width: 100vw;
+  }
+}
+
+@media (min-width: 421px) and (max-width: 980px) {
+  .tp-drawer {
+    width: min(520px, 92vw);
   }
 }

@@ -307,7 +307,16 @@ export default function TablePage() {
 
         {/* MAIN CARD */}
         <div className="tp-card">
+          {selectedCategory && (
+              <button
+                className="tp-backButton"
+                onClick={() => setSelectedCategory(null)}
+              >
+                ← Back to categories
+              </button>
+            )}
           <div className="tp-cardHeader">
+            
             {selectedCategory ? (
               <>
                 <div>
@@ -316,13 +325,6 @@ export default function TablePage() {
                     {selectedCategory}
                   </h2>
                 </div>
-
-                <button
-                  className="tp-btn tp-btn--secondary"
-                  onClick={() => setSelectedCategory(null)}
-                >
-                  ← Back
-                </button>
               </>
             ) : (
               <>
