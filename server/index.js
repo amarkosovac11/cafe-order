@@ -5,9 +5,15 @@ const { Server } = require("socket.io");
 const { PrismaClient } = require("@prisma/client");
 const crypto = require("crypto");
 
-
 const app = express();
 const prisma = new PrismaClient();
+
+const PUBLIC_CLIENT_URL = process.env.PUBLIC_CLIENT_URL || "http://78.47.119.6";
+
+const allowedOrigins = [
+  PUBLIC_CLIENT_URL,
+  "http://localhost:5173",
+];
 
 /* ---------- Helpers ---------- */
 function randomToken(len = 18) {
@@ -15,14 +21,19 @@ function randomToken(len = 18) {
 }
 
 /* ---------- Middleware ---------- */
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-
 app.use(
   cors({
-    origin: CLIENT_ORIGIN,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
+
 app.use(express.json());
 
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
@@ -30,9 +41,7 @@ console.log("DATABASE_URL:", process.env.DATABASE_URL);
 /* console.log("ADMIN_USER =", process.env.ADMIN_USER);
 console.log("ADMIN_PASS set?", Boolean(process.env.ADMIN_PASS)); */
 
-
 app.get("/debug/env", (req, res) => {
-  // SAFE: we do NOT return the password, only whether it exists
   res.json({
     ADMIN_USER: process.env.ADMIN_USER ?? null,
     ADMIN_PASS_SET: Boolean(process.env.ADMIN_PASS),
@@ -86,14 +95,13 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-
 /* ---------- HTTP server + Socket.IO ---------- */
 const PORT = process.env.PORT || 4000;
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_ORIGIN,
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: true,
   },
@@ -104,11 +112,8 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => console.log("Socket disconnected:", socket.id));
 });
 
-
-
 /* ---------- Health + Menu (DB) ---------- */
 app.get("/health", (req, res) => res.json({ status: "ok" }));
-
 
 app.get("/menu", async (req, res) => {
   try {
@@ -122,6 +127,7 @@ app.get("/menu", async (req, res) => {
     res.status(500).json({ error: "Failed to load menu" });
   }
 });
+
 // ✅ Create Menu Category
 app.post("/menu-category", requireAdmin, async (req, res) => {
   try {
@@ -134,7 +140,6 @@ app.post("/menu-category", requireAdmin, async (req, res) => {
 
     res.status(201).json(created);
   } catch (e) {
-    // Prisma unique constraint violation
     if (e.code === "P2002") {
       return res.status(409).json({ error: "Category already exists" });
     }
@@ -194,7 +199,6 @@ app.post("/menu-item", requireAdmin, async (req, res) => {
       return res.status(400).json({ error: "Price must be a number > 0" });
     }
 
-    // Ensure category exists (better error message)
     const cat = await prisma.menuCategory.findUnique({ where: { id: categoryId } });
     if (!cat) return res.status(404).json({ error: "Category not found" });
 
@@ -246,7 +250,6 @@ app.put("/menu-item/:id", requireAdmin, async (req, res) => {
 
     res.json(updated);
   } catch (e) {
-    // Prisma record not found
     if (e.code === "P2025") return res.status(404).json({ error: "Item not found" });
 
     console.error("PUT /menu-item/:id failed:", e);
@@ -270,12 +273,10 @@ app.delete("/menu-item/:id", requireAdmin, async (req, res) => {
   }
 });
 
-
 /* =========================
    ORDERS (Prisma)
 ========================= */
 
-// Create order
 app.post("/orders", requireValidTable, async (req, res) => {
   try {
     const { tableId, items } = req.body;
@@ -309,7 +310,6 @@ app.post("/orders", requireValidTable, async (req, res) => {
   }
 });
 
-// List unclaimed
 app.get("/orders/unclaimed", async (req, res) => {
   try {
     const data = await prisma.order.findMany({
@@ -325,7 +325,6 @@ app.get("/orders/unclaimed", async (req, res) => {
   }
 });
 
-// Claim (atomic)
 app.patch("/orders/:orderId/claim", async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -363,7 +362,6 @@ app.patch("/orders/:orderId/claim", async (req, res) => {
   }
 });
 
-// Unclaim
 app.post("/orders/:id/unclaim", async (req, res) => {
   try {
     const orderId = String(req.params.id);
@@ -406,7 +404,6 @@ app.post("/orders/:id/unclaim", async (req, res) => {
   }
 });
 
-// Claimed for waiter
 app.get("/orders/claimed/:waiterId", async (req, res) => {
   try {
     const waiterId = Number(req.params.waiterId);
@@ -427,7 +424,6 @@ app.get("/orders/claimed/:waiterId", async (req, res) => {
   }
 });
 
-// Finish order (delete) - idempotent
 app.delete("/orders/:orderId", async (req, res) => {
   try {
     const orderId = String(req.params.orderId);
@@ -471,7 +467,6 @@ app.post("/calls", requireValidTable, async (req, res) => {
   }
 });
 
-// Validate table (used by Table page)
 app.get("/tables/:tableId", async (req, res) => {
   try {
     const { tableId } = req.params;
@@ -535,7 +530,6 @@ app.patch("/calls/:callId/handle", async (req, res) => {
    WAITERS (Public)
 ========================= */
 
-// List active waiters (for pick-waiter page)
 app.get("/waiters", async (req, res) => {
   try {
     const waiters = await prisma.waiter.findMany({
@@ -573,6 +567,7 @@ app.get("/waiters/:waiterId", async (req, res) => {
    ADMIN: TABLES (CRUD)
 ========================= */
 app.use("/api/admin", requireAdmin);
+
 app.get("/api/admin/tables", async (req, res) => {
   try {
     const tables = await prisma.table.findMany({
@@ -660,7 +655,7 @@ app.post("/api/admin/tables/:tableId/rotate-token", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-app.use("/api/admin", requireAdmin);
+
 app.get("/api/admin/tables/:tableId/scan-url", async (req, res) => {
   try {
     const tableId = String(req.params.tableId);
@@ -669,9 +664,10 @@ app.get("/api/admin/tables/:tableId/scan-url", async (req, res) => {
       where: { id: tableId },
       select: { id: true, token: true, isActive: true },
     });
+
     if (!table || !table.isActive) return res.status(404).json({ error: "table not found" });
 
-    const base = process.env.PUBLIC_CLIENT_URL || CLIENT_ORIGIN || "http://localhost:5173";
+    const base = PUBLIC_CLIENT_URL;
     const url = `${base}/t/${table.id}?token=${encodeURIComponent(table.token)}`;
 
     res.json({ url, tableId: table.id, token: table.token });
@@ -684,7 +680,6 @@ app.get("/api/admin/tables/:tableId/scan-url", async (req, res) => {
 /* =========================
    ADMIN: WAITERS (CRUD) - NO PIN
 ========================= */
-app.use("/api/admin", requireAdmin);
 app.get("/api/admin/waiters", async (req, res) => {
   try {
     const waiters = await prisma.waiter.findMany({
@@ -758,24 +753,21 @@ app.delete("/api/admin/waiters/:waiterId", async (req, res) => {
   }
 });
 
-
-// ✅ Admin: get orders for a table (latest first)
-app.use("/api/admin", requireAdmin);
 app.get("/api/admin/tables/:tableId/orders", async (req, res) => {
   try {
     const tableId = String(req.params.tableId);
 
-    // Optional: ensure table exists
     const table = await prisma.table.findUnique({
       where: { id: tableId },
       select: { id: true },
     });
+
     if (!table) return res.status(404).json({ error: "table not found" });
 
     const orders = await prisma.order.findMany({
       where: { tableId },
       orderBy: { createdAt: "desc" },
-      take: 50, // limit to avoid huge payload
+      take: 50,
       include: { items: true },
     });
 
@@ -785,8 +777,6 @@ app.get("/api/admin/tables/:tableId/orders", async (req, res) => {
     res.status(500).json({ error: "server error" });
   }
 });
-
-
 
 /* ---------- Start server ---------- */
 server.listen(PORT, "0.0.0.0", () => {
