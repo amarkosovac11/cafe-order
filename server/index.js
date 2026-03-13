@@ -8,11 +8,13 @@ const crypto = require("crypto");
 const app = express();
 const prisma = new PrismaClient();
 
-const PUBLIC_CLIENT_URL = process.env.PUBLIC_CLIENT_URL || "http://78.47.119.6";
+const PUBLIC_CLIENT_URL = process.env.PUBLIC_CLIENT_URL || "http://demo.tap2order.ba";
 
 const allowedOrigins = [
   PUBLIC_CLIENT_URL,
   "http://localhost:5173",
+  "http://demo.tap2order.ba",
+  "https://demo.tap2order.ba",
 ];
 
 /* ---------- Helpers ---------- */
