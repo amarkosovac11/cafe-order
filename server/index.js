@@ -781,6 +781,7 @@ app.get("/api/admin/tables/:tableId/orders", async (req, res) => {
 });
 
 /* ---------- Start server ---------- */
-server.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, "127.0.0.1", () => {
   console.log("Server running on port", PORT);
 });
+
