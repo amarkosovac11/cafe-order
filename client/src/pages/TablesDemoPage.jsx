@@ -56,7 +56,7 @@ export default function TablesDemoPage() {
       return;
     }
     const { url } = await r.json();
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.location.href = url;
   }
 
   async function viewOrders(tableId) {
