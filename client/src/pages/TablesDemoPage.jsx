@@ -160,7 +160,7 @@ export default function TablesDemoPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Open (with token)
+                  Otvori (with token)
                 </button>
               </div>
             </div>
