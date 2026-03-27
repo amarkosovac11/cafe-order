@@ -450,7 +450,7 @@ export default function WaiterPage() {
                   <div className="wp-cardInner">
                     <div className="wp-cardTop">
                       <div>
-                        <div className="wp-cardTitle">Table {o.tableId}</div>
+                        <div className="wp-cardTitle">Room {o.tableId}</div>
                         <div className="wp-meta">
                           Claimed at {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
                         </div>
