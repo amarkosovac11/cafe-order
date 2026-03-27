@@ -41,7 +41,7 @@ export default function PickWaiter() {
       <div className="pw-shell">
         <div className="pw-top">
           <div>
-            <h1 className="pw-title">Pick waiter</h1>
+            <h1 className="pw-title">Pick staff</h1>
             <div className="pw-sub">Choose your name to open your personal page.</div>
           </div>
 
@@ -53,9 +53,9 @@ export default function PickWaiter() {
         {err && <div className="pw-alert">Error: {err}</div>}
 
         {loading ? (
-          <div className="pw-loading">Loading waiters…</div>
+          <div className="pw-loading">Loading staff</div>
         ) : waiters.length === 0 ? (
-          <div className="pw-empty">No active waiters found.</div>
+          <div className="pw-empty">No active staff found.</div>
         ) : (
           <div className="pw-grid">
             {waiters.map((w) => (

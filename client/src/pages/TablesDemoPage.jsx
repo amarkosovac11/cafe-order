@@ -93,9 +93,9 @@ export default function TablesDemoPage() {
         borderRadius: 12,
       }}
     >
-      <h1 style={{ marginBottom: 8 }}>Admin — See Tables</h1>
+      <h1 style={{ marginBottom: 8 }}>Admin — See Rooms</h1>
       <p style={{ marginTop: 0, opacity: 0.75 }}>
-        View tables and open the table page with the correct token.
+        View rooms and open the room page with the correct token.
       </p>
 
       {err && <div style={{ color: "#f87171", marginBottom: 10 }}>{err}</div>}
@@ -160,7 +160,7 @@ export default function TablesDemoPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Otvori (with token)
+                  Open (with token)
                 </button>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function TablesDemoPage() {
         })}
 
         {tables.length === 0 && !loading && (
-          <div style={{ padding: 14, opacity: 0.7 }}>No tables found.</div>
+          <div style={{ padding: 14, opacity: 0.7 }}>No rooms found.</div>
         )}
       </div>
 
@@ -201,7 +201,7 @@ export default function TablesDemoPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
               <div>
-                <div style={{ fontWeight: 900, fontSize: 18 }}>Orders — Table {ordersTableId}</div>
+                <div style={{ fontWeight: 900, fontSize: 18 }}>Orders — Room {ordersTableId}</div>
                 <div style={{ fontSize: 12, opacity: 0.75 }}>Latest 50 orders</div>
               </div>
 
@@ -226,7 +226,7 @@ export default function TablesDemoPage() {
               {ordersErr && <div style={{ color: "#f87171" }}>{ordersErr}</div>}
 
               {!ordersLoading && !ordersErr && orders.length === 0 && (
-                <div style={{ opacity: 0.75 }}>No orders for this table yet.</div>
+                <div style={{ opacity: 0.75 }}>No orders for this room yet.</div>
               )}
 
               {!ordersLoading && !ordersErr && orders.length > 0 && (

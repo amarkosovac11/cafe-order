@@ -274,7 +274,7 @@ export default function WaiterPersonalPage() {
       <div className="wpp-page">
         <div className="wpp-shell">
           <div className="wpp-section">
-            <div className="wpp-subText">Loading waiter…</div>
+            <div className="wpp-subText">Loading staff page…</div>
           </div>
         </div>
       </div>
@@ -286,8 +286,8 @@ export default function WaiterPersonalPage() {
       <div className="wpp-page">
         <div className="wpp-shell">
           <div className="wpp-section">
-            <h2 className="wpp-h2">Waiter not found</h2>
-            <p className="wpp-subText">This waiter ID is invalid.</p>
+            <h2 className="wpp-h2">Staff member not found</h2>
+            <p className="wpp-subText">This staff ID is invalid.</p>
           </div>
         </div>
       </div>
@@ -299,7 +299,7 @@ export default function WaiterPersonalPage() {
       <div className="wpp-shell">
         <div className="wpp-top">
           <div>
-            <h1 className="wpp-title">Waiter</h1>
+            <h1 className="wpp-title">Staff Dashboard</h1>
 
             <div className="wpp-actions" style={{ justifyContent: "flex-start" }}>
               <button
@@ -316,17 +316,17 @@ export default function WaiterPersonalPage() {
             </div>
 
             <div className="wpp-sub">
-              Personal page for waiterId: <b>{waiterId}</b>
+              Personal dashboard for staff ID: <b>{waiterId}</b>
             </div>
           </div>
 
           <div className="wpp-actions">
             <Link to="/pick-waiter" className="wpp-linkBtn wpp-linkBtn--light">
-              ← Change Waiter
+              ← Change Staff Member
             </Link>
 
             <Link to="/waiter" className="wpp-linkBtn wpp-linkBtn--primary">
-              Shared Dashboard
+              Main Dashboard
             </Link>
           </div>
         </div>
@@ -340,12 +340,12 @@ export default function WaiterPersonalPage() {
 
         {/* CALLS */}
         <div className="wpp-section">
-          <h2 className="wpp-h2">Calls</h2>
+          <h2 className="wpp-h2">Guest Requests</h2>
 
           {loadingCalls ? (
-            <div className="wpp-subText">Loading calls…</div>
+            <div className="wpp-subText">Loading guest requests…</div>
           ) : calls.length === 0 ? (
-            <div className="wpp-subText">No open calls.</div>
+            <div className="wpp-subText">No open guest requests.</div>
           ) : (
             <div className="wpp-grid">
               {calls.map((c) => (
@@ -354,7 +354,7 @@ export default function WaiterPersonalPage() {
                     <div className="wpp-cardTop">
                       <div>
                         <div className="wpp-cardTitle">
-                          Table {c.tableId} — {c.type === "bill" ? "💰 Bill" : "👋 Waiter"}
+                          Room {c.tableId} — {c.type === "bill" ? "🧾 Check request" : "🔔 Assistance request"}
                         </div>
                         <div className="wpp-meta">{new Date(c.createdAt).toLocaleString()}</div>
                       </div>
@@ -372,15 +372,15 @@ export default function WaiterPersonalPage() {
 
         {/* UNCLAIMED */}
         <div className="wpp-section">
-          <h2 className="wpp-h2">Unclaimed Orders</h2>
-          <p className="wpp-subText">
-            Everyone sees these. Click <b>Claim</b> to take it.
-          </p>
+          <h2 className="wpp-h2">Open Room Service Orders</h2>
+<p className="wpp-subText">
+  These orders are visible to all staff. Click <b>Claim</b> to take responsibility.
+</p>
 
           {loadingOrders ? (
-            <div className="wpp-subText">Loading orders…</div>
+            <div className="wpp-subText">Loading room service orders…</div>
           ) : orders.length === 0 ? (
-            <div className="wpp-subText">No unclaimed orders.</div>
+            <div className="wpp-subText">No open room service orders.</div>
           ) : (
             <div className="wpp-grid">
               {orders.map((o) => (
@@ -388,7 +388,7 @@ export default function WaiterPersonalPage() {
                   <div className="wpp-cardInner">
                     <div className="wpp-cardTop">
                       <div>
-                        <div className="wpp-cardTitle">Table {o.tableId}</div>
+                        <div className="wpp-cardTitle">Room {o.tableId}</div>
                         <div className="wpp-meta">{new Date(o.createdAt).toLocaleString()}</div>
                         <div className="wpp-meta">Order ID: {o.id}</div>
                       </div>
@@ -420,12 +420,12 @@ export default function WaiterPersonalPage() {
 
         {/* MY ORDERS */}
         <div className="wpp-section">
-          <h2 className="wpp-h2">My Orders</h2>
+          <h2 className="wpp-h2">My Assigned Orders</h2>
 
           {loadingMyOrders ? (
-            <div className="wpp-subText">Loading my orders…</div>
+            <div className="wpp-subText">Loading assigned orders…</div>
           ) : myOrders.length === 0 ? (
-            <div className="wpp-subText">No claimed orders yet.</div>
+            <div className="wpp-subText">No assigned orders yet.</div>
           ) : (
             <div className="wpp-grid">
               {myOrders.map((o) => (
@@ -433,7 +433,7 @@ export default function WaiterPersonalPage() {
                   <div className="wpp-cardInner">
                     <div className="wpp-cardTop">
                       <div>
-                        <div className="wpp-cardTitle">Table {o.tableId}</div>
+                        <div className="wpp-cardTitle">Room {o.tableId}</div>
                         <div className="wpp-meta">
                           Claimed at {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
                         </div>
@@ -442,7 +442,7 @@ export default function WaiterPersonalPage() {
 
                       <div className="wpp-btnRow">
                         <button onClick={() => finishOrder(o.id)} className="wpp-btn wpp-btn--success">
-                          Done
+                          Completed
                         </button>
                         {o.status === "CLAIMED" && (
                           <button onClick={() => unclaimOrder(o.id)} className="wpp-btn wpp-btn--danger">

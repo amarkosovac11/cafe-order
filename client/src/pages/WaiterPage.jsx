@@ -285,7 +285,7 @@ export default function WaiterPage() {
         <div className="wp-top">
           <div>
             <div className="wp-titleRow">
-              <h1 className="wp-title">Waiter Dashboard</h1>
+              <h1 className="wp-title">Staff Dashboard</h1>
               <span className="wp-pill">{soundEnabled ? "Sound ✅" : "Sound OFF"}</span>
             </div>
 
@@ -306,7 +306,7 @@ export default function WaiterPage() {
           </div>
 
           <div className="wp-right">
-            <span className="wp-label">Waiter:</span>
+            <span className="wp-label">Staff:</span>
             <select
               className="wp-select"
               value={selectedWaiterId}
@@ -317,7 +317,7 @@ export default function WaiterPage() {
               }}
             >
               <option value="" disabled>
-                Select waiter
+                Select staff member
               </option>
               {waiters.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -335,8 +335,8 @@ export default function WaiterPage() {
 
         {!hasWaiter && (
           <div className="wp-alert wp-alert--warn">
-            <div className="wp-alertTitle">Waiter not selected</div>
-            <div className="wp-alertBody">Please select a waiter to use the dashboard.</div>
+            <div className="wp-alertTitle">Staff member not selected</div>
+            <div className="wp-alertBody">Please select a staff member to use the dashboard.</div>
           </div>
         )}
 
@@ -363,7 +363,7 @@ export default function WaiterPage() {
                     <div className="wp-cardTop">
                       <div>
                         <div className="wp-cardTitle">
-                          Table {c.tableId} — {c.type === "bill" ? "💰 Bill" : "👋 Waiter"}
+                          Room {c.tableId} — {c.type === "bill" ? "🧾 Check request" : "🔔 Assistance request"}
                         </div>
                         <div className="wp-meta">{new Date(c.createdAt).toLocaleString()}</div>
                       </div>

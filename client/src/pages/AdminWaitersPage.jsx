@@ -54,7 +54,7 @@ export default function AdminWaitersPage() {
 
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
-      setErr(j.error || "Failed to create waiter");
+      setErr(j.error || "Failed to create staff");
       return;
     }
 
@@ -74,7 +74,7 @@ export default function AdminWaitersPage() {
 
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
-      setErr(j.error || "Failed to update waiter");
+      setErr(j.error || "Failed to update staff");
       return;
     }
     load();
@@ -88,7 +88,7 @@ export default function AdminWaitersPage() {
 
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
-      setErr(j.error || "Failed to delete waiter");
+      setErr(j.error || "Failed to delete staff");
       return;
     }
     load();
@@ -105,7 +105,7 @@ export default function AdminWaitersPage() {
         borderRadius: 12,
       }}
     >
-      <h1 style={{ marginBottom: 8 }}>Admin — Waiters</h1>
+      <h1 style={{ marginBottom: 8 }}>Admin — Hotel Staff</h1>
 
       <form onSubmit={createWaiter} style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         <input
@@ -152,7 +152,7 @@ export default function AdminWaitersPage() {
         ))}
 
         {waiters.length === 0 && !loading && (
-          <div style={{ padding: 14, opacity: 0.7 }}>No waiters yet. Add one above.</div>
+          <div style={{ padding: 14, opacity: 0.7 }}>No staff yet. Add one above.</div>
         )}
       </div>
     </div>
