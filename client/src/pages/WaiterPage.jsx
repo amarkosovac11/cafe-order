@@ -401,7 +401,7 @@ export default function WaiterPage() {
                   <div className="wp-cardInner">
                     <div className="wp-cardTop">
                       <div>
-                        <div className="wp-cardTitle">Table {o.tableId}</div>
+                        <div className="wp-cardTitle">Room {o.tableId}</div>
                         <div className="wp-meta">{new Date(o.createdAt).toLocaleString()}</div>
                         <div className="wp-meta">Order ID: {o.id}</div>
                       </div>
