@@ -74,8 +74,8 @@ export default function TablePage() {
     setErr("");
     setCallMsg("");
 
-    // ✅ toast instead of opening cart
-    showToast(`Added “${it.name}” ✅`);
+    //  toast instead of opening cart
+    showToast(`Added “${it.name}” `);
 
     setCart((prev) => {
       const existing = prev[it.id];
@@ -150,7 +150,7 @@ export default function TablePage() {
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
       setCart({});
-      setPlacedMsg("✅ Order sent! Waiter will see it now.");
+      setPlacedMsg("Your room service order has been sent.");
       setCartOpen(false);
       setSelectedCategory(null); // optional: back to categories
     } catch (e) {
@@ -178,7 +178,7 @@ export default function TablePage() {
       const text = await res.text();
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-      setCallMsg("✅ Waiter has been notified.");
+      setCallMsg("Your request has been sent to staff.");
     } catch (e) {
       setErr(e.message);
     }
@@ -202,7 +202,7 @@ export default function TablePage() {
       const text = await res.text();
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-      setCallMsg("✅ Bill requested.");
+      setCallMsg("Bill requested.");
     } catch (e) {
       setErr(e.message);
     }
@@ -249,21 +249,21 @@ export default function TablePage() {
         {/* Header */}
         <div className="tp-header">
           <div>
-            <div className="tp-kicker">Cafe Menu</div>
-            <h1 className="tp-h1">Table {tableId}</h1>
-            <div className="tp-sub">
-              {selectedCategory ? "Pick items and add to cart" : "Choose a category to start"}
-            </div>
+            <div className="tp-kicker">Room Service</div>
+<h1 className="tp-h1">Room {tableId}</h1>
+<div className="tp-sub">
+  {selectedCategory ? "Choose items and add them to your order" : "Browse the menu or request hotel services"}
+</div>
           </div>
 
           <div className="tp-headerActions">
             <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
               <span className="tp-btnIcon" aria-hidden="true">🔔</span>
-              Call waiter
+              Call staff
             </button>
             <button onClick={requestBill} className="tp-btn tp-btn--secondary">
               <span className="tp-btnIcon" aria-hidden="true">🧾</span>
-              Request bill
+              Need assistance
             </button>
 
             <button
@@ -312,7 +312,7 @@ export default function TablePage() {
                 className="tp-backButton"
                 onClick={() => setSelectedCategory(null)}
               >
-                ← Back to categories
+                ← Back to menu
               </button>
             )}
           <div className="tp-cardHeader">
@@ -328,7 +328,7 @@ export default function TablePage() {
               </>
             ) : (
               <>
-                <h2 className="tp-h2">Categories</h2>
+                <h2 className="tp-h2">Menu</h2>
                 <div className="tp-badge">{categories.length} total</div>
               </>
             )}
@@ -383,7 +383,7 @@ export default function TablePage() {
                     <div className="tp-price">{it.price.toFixed(2)} KM</div>
                     <button onClick={() => addItem(it)} className="tp-btn tp-btn--primary">
                       <span className="tp-btnIcon" aria-hidden="true">＋</span>
-                      Add
+                      Add to order
                     </button>
                   </div>
                 </div>
@@ -481,7 +481,7 @@ export default function TablePage() {
                   {placing ? "Sending…" : "Finish order"}
                 </button>
 
-                <div className="tp-finePrint">Order goes instantly to the waiter.</div>
+                <div className="tp-finePrint">Your order is sent instantly to hotel staff.</div>
               </div>
             </div>
           </div>
