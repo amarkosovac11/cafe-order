@@ -123,7 +123,7 @@ export default function TablesDemoPage() {
             >
               <div>
                 <div style={{ fontWeight: 800 }}>
-                  Soba {t.id} {t.name ? `— ${t.name}` : ""}
+                  Soba {t.id}
                 </div>
                 {/* <div style={{ fontSize: 12, opacity: 0.75 }}>
                   {t.isActive ? "Active" : "Inactive"} • token: {String(t.token).slice(0, 8)}…
