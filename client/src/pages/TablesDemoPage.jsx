@@ -93,10 +93,10 @@ export default function TablesDemoPage() {
         borderRadius: 12,
       }}
     >
-      <h1 style={{ marginBottom: 8 }}>Admin — See Rooms</h1>
-      <p style={{ marginTop: 0, opacity: 0.75 }}>
+      <h1 style={{ marginBottom: 8 }}>Admin — Sobe</h1>
+      {/* <p style={{ marginTop: 0, opacity: 0.75 }}>
         View rooms and open the room page with the correct token.
-      </p>
+      </p> */}
 
       {err && <div style={{ color: "#f87171", marginBottom: 10 }}>{err}</div>}
       {loading && <div style={{ opacity: 0.8 }}>Loading…</div>}
@@ -123,11 +123,11 @@ export default function TablesDemoPage() {
             >
               <div>
                 <div style={{ fontWeight: 800 }}>
-                  {t.id} {t.name ? `— ${t.name}` : ""}
+                  Soba {t.id} {t.name ? `— ${t.name}` : ""}
                 </div>
-                <div style={{ fontSize: 12, opacity: 0.75 }}>
+                {/* <div style={{ fontSize: 12, opacity: 0.75 }}>
                   {t.isActive ? "Active" : "Inactive"} • token: {String(t.token).slice(0, 8)}…
-                </div>
+                </div> */}
               </div>
 
               <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
@@ -144,7 +144,7 @@ export default function TablesDemoPage() {
                       fontWeight: 700,
                     }}
                   >
-                    View Orders
+                    Pogledaj narudžbe
                   </button>
                 )}
 
@@ -160,7 +160,7 @@ export default function TablesDemoPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Open (with token)
+                  Otvori
                 </button>
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function TablesDemoPage() {
                   fontWeight: 800,
                 }}
               >
-                Close
+                Zatvori
               </button>
             </div>
 
@@ -226,7 +226,7 @@ export default function TablesDemoPage() {
               {ordersErr && <div style={{ color: "#f87171" }}>{ordersErr}</div>}
 
               {!ordersLoading && !ordersErr && orders.length === 0 && (
-                <div style={{ opacity: 0.75 }}>No orders for this room yet.</div>
+                <div style={{ opacity: 0.75 }}>Nema narudžbi</div>
               )}
 
               {!ordersLoading && !ordersErr && orders.length > 0 && (

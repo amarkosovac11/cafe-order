@@ -15,14 +15,14 @@ export default function AdminHome() {
       <div className="adminHomeWrap">
         <div className="adminHomeHeader">
           <div>
-            <h1 className="adminHomeTitle">Hotel Operations</h1>
+            <h1 className="adminHomeTitle">Hotel Dashboard</h1>
             <p className="adminHomeSubtitle">
-              Manage rooms, staff activity, guest requests and room service.
+              Upravljaj sobama, osobljem, zahtjevima gostiju i room service-om.
             </p>
           </div>
 
           <Link className="adminHomeBtn" to="/waiter">
-            Open Staff Dashboard
+            Otvori dashboard za osoblje
           </Link>
         </div>
 
@@ -30,40 +30,40 @@ export default function AdminHome() {
           <Link to="/admin/tables" className="adminHomeCard">
             <div className="adminHomeCardTop">
               <span className="adminHomeIcon">🛏️</span>
-              <span className="adminHomeCardTitle">See Rooms</span>
+              <span className="adminHomeCardTitle">Pogledaj sobe</span>
             </div>
             <div className="adminHomeCardDesc">
-              View rooms and open guest room pages.
+              Pregledajte sobe i otvorite stranice soba za goste.
             </div>
           </Link>
 
           <Link to="/waiter" className="adminHomeCard">
             <div className="adminHomeCardTop">
               <span className="adminHomeIcon">🛎️</span>
-              <span className="adminHomeCardTitle">Staff Dashboard</span>
+              <span className="adminHomeCardTitle">Dashboard za osoblje</span>
             </div>
             <div className="adminHomeCardDesc">
-              Monitor room service orders and guest requests live.
+              Pratite narudžbe u sobi i zahtjeve gostiju uživo.
             </div>
           </Link>
 
           <Link to="/admin/waiters" className="adminHomeCard">
             <div className="adminHomeCardTop">
               <span className="adminHomeIcon">🧑‍💼</span>
-              <span className="adminHomeCardTitle">Manage Staff</span>
+              <span className="adminHomeCardTitle">Upravljaj osobljem</span>
             </div>
             <div className="adminHomeCardDesc">
-              Add, disable or remove staff accounts.
+              Dodajte, onemogućite ili uklonite račune osoblja..
             </div>
           </Link>
 
           <Link to="/admin/menu" className="adminHomeCard">
             <div className="adminHomeCardTop">
               <span className="adminHomeIcon">🍽️</span>
-              <span className="adminHomeCardTitle">Manage Room Service Menu</span>
+              <span className="adminHomeCardTitle">Room Service Menu</span>
             </div>
             <div className="adminHomeCardDesc">
-              Edit categories, menu items and availability.
+              Uredite kategorije, stavke menija i dostupnost.
             </div>
           </Link>
         </div>
