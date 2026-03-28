@@ -221,7 +221,7 @@ export default function TablePage() {
       <div className="tp-shell">
         <div className="tp-header tp-header--stacked">
   <div className="tp-headerPanel tp-headerPanel--info">
-    <div className="tp-header">
+   <div className="tp-header">
   <div>
     <div className="tp-kicker">Posluga u sobu</div>
     <h1 className="tp-h1">Soba {tableId}</h1>
