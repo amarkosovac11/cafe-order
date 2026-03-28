@@ -244,14 +244,7 @@ export default function TablePage() {
               Zatraži pomoć
             </button> */}
 
-            <button
-              onClick={() => setCartOpen(true)}
-              className="tp-btn tp-btn--secondary tp-cartBtn"
-            >
-              <span className="tp-btnIcon" aria-hidden="true">🛒</span>
-              Korpa
-              <span className="tp-cartCount">{cartQty}</span>
-            </button>
+           
           </div>
         </div>
 
@@ -441,6 +434,19 @@ export default function TablePage() {
                 )}
               </div>
 
+{hasItems && !cartOpen && (
+  <button
+    type="button"
+    className="tp-stickyCartBar"
+    onClick={() => setCartOpen(true)}
+    aria-label="Otvori korpu"
+  >
+    <span className="tp-stickyCartCount">{cartQty}</span>
+    <span className="tp-stickyCartLabel">Vidi korpu</span>
+    <span className="tp-stickyCartPrice">{total.toFixed(2)} KM</span>
+  </button>
+)}
+              
               <div className="tp-drawerFooter">
                 <div className="tp-totalRow">
                   <div className="tp-totalLabel">Ukupno</div>
