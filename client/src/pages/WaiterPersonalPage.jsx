@@ -201,7 +201,7 @@ export default function WaiterPersonalPage() {
 
   const claimOrder = async (orderId) => {
     setErr("");
-    if (!waiterId) return setErr("Missing waiterId in URL.");
+    if (!waiterId) return setErr("Nedostaje waiterId u URL-u.");
 
     try {
       const res = await fetch(`${api}/orders/${orderId}/claim`, {
@@ -222,7 +222,7 @@ export default function WaiterPersonalPage() {
 
   const handleCall = async (callId) => {
     setErr("");
-    if (!waiterId) return setErr("Missing waiterId in URL.");
+    if (!waiterId) return setErr("Nedostaje waiterId u URL-u.");
 
     try {
       const res = await fetch(`${api}/calls/${callId}/handle`, {
@@ -274,7 +274,7 @@ export default function WaiterPersonalPage() {
       <div className="wpp-page">
         <div className="wpp-shell">
           <div className="wpp-section">
-            <div className="wpp-subText">Loading staff page…</div>
+            <div className="wpp-subText">Učitavanje stranice osoblja…</div>
           </div>
         </div>
       </div>
@@ -286,8 +286,8 @@ export default function WaiterPersonalPage() {
       <div className="wpp-page">
         <div className="wpp-shell">
           <div className="wpp-section">
-            <h2 className="wpp-h2">Staff member not found</h2>
-            <p className="wpp-subText">This staff ID is invalid.</p>
+            <h2 className="wpp-h2">Član osoblja nije pronađen</h2>
+            <p className="wpp-subText">Ovaj ID osoblja nije važeći.</p>
           </div>
         </div>
       </div>
@@ -299,7 +299,7 @@ export default function WaiterPersonalPage() {
       <div className="wpp-shell">
         <div className="wpp-top">
           <div>
-            <h1 className="wpp-title">Staff Dashboard</h1>
+            <h1 className="wpp-title">Kontrolna ploča osoblja</h1>
 
             <div className="wpp-actions" style={{ justifyContent: "flex-start" }}>
               <button
@@ -308,7 +308,7 @@ export default function WaiterPersonalPage() {
                   "wpp-btn " + (soundEnabled ? "wpp-btn--soundOn" : "wpp-btn--primary")
                 }
               >
-                {soundEnabled ? "Sound ✅" : "Enable Sound"}
+                {soundEnabled ? "Zvuk ✅" : "Uključi zvuk"}
               </button>
 
               <audio ref={orderSoundRef} src="/sounds/new-order.mp3" preload="auto" />
@@ -316,36 +316,36 @@ export default function WaiterPersonalPage() {
             </div>
 
             <div className="wpp-sub">
-              Personal dashboard for staff ID: <b>{waiterId}</b>
+              Lična kontrolna ploča za osoblje ID: <b>{waiterId}</b>
             </div>
           </div>
 
           <div className="wpp-actions">
             <Link to="/pick-waiter" className="wpp-linkBtn wpp-linkBtn--light">
-              ← Change Staff Member
+              ← Promijeni člana osoblja
             </Link>
 
             <Link to="/waiter" className="wpp-linkBtn wpp-linkBtn--primary">
-              Main Dashboard
+              Glavna kontrolna ploča
             </Link>
           </div>
         </div>
 
         {err && (
           <div className="wpp-alert wpp-alert--error">
-            <div className="wpp-alertTitle">Error</div>
+            <div className="wpp-alertTitle">Greška</div>
             <div className="wpp-alertBody">{err}</div>
           </div>
         )}
 
         {/* CALLS */}
         <div className="wpp-section">
-          <h2 className="wpp-h2">Guest Requests</h2>
+          <h2 className="wpp-h2">Zahtjevi gostiju</h2>
 
           {loadingCalls ? (
-            <div className="wpp-subText">Loading guest requests…</div>
+            <div className="wpp-subText">Učitavanje zahtjeva gostiju…</div>
           ) : calls.length === 0 ? (
-            <div className="wpp-subText">No open guest requests.</div>
+            <div className="wpp-subText">Nema otvorenih zahtjeva gostiju.</div>
           ) : (
             <div className="wpp-grid">
               {calls.map((c) => (
@@ -354,13 +354,13 @@ export default function WaiterPersonalPage() {
                     <div className="wpp-cardTop">
                       <div>
                         <div className="wpp-cardTitle">
-                          Room {c.tableId} — {c.type === "bill" ? "🧾 Check request" : "🔔 Assistance request"}
+                          Soba {c.tableId} — {c.type === "bill" ? "🧾 Zahtjev za račun" : "🔔 Zahtjev za pomoć"}
                         </div>
                         <div className="wpp-meta">{new Date(c.createdAt).toLocaleString()}</div>
                       </div>
 
                       <button onClick={() => handleCall(c.id)} className="wpp-btn wpp-btn--primary">
-                        Handled
+                        Obrađeno
                       </button>
                     </div>
                   </div>
@@ -372,15 +372,15 @@ export default function WaiterPersonalPage() {
 
         {/* UNCLAIMED */}
         <div className="wpp-section">
-          <h2 className="wpp-h2">Open Room Service Orders</h2>
-<p className="wpp-subText">
-  These orders are visible to all staff. Click <b>Claim</b> to take responsibility.
-</p>
+          <h2 className="wpp-h2">Otvorene room service narudžbe</h2>
+          <p className="wpp-subText">
+            Ove narudžbe su vidljive svom osoblju. Kliknite <b>Preuzmi</b> da preuzmete odgovornost.
+          </p>
 
           {loadingOrders ? (
-            <div className="wpp-subText">Loading room service orders…</div>
+            <div className="wpp-subText">Učitavanje room service narudžbi…</div>
           ) : orders.length === 0 ? (
-            <div className="wpp-subText">No open room service orders.</div>
+            <div className="wpp-subText">Nema otvorenih room service narudžbi.</div>
           ) : (
             <div className="wpp-grid">
               {orders.map((o) => (
@@ -388,13 +388,13 @@ export default function WaiterPersonalPage() {
                   <div className="wpp-cardInner">
                     <div className="wpp-cardTop">
                       <div>
-                        <div className="wpp-cardTitle">Room {o.tableId}</div>
+                        <div className="wpp-cardTitle">Soba {o.tableId}</div>
                         <div className="wpp-meta">{new Date(o.createdAt).toLocaleString()}</div>
-                        <div className="wpp-meta">Order ID: {o.id}</div>
+                        <div className="wpp-meta">ID narudžbe: {o.id}</div>
                       </div>
 
                       <button onClick={() => claimOrder(o.id)} className="wpp-btn wpp-btn--primary">
-                        Claim
+                        Preuzmi
                       </button>
                     </div>
 
@@ -405,7 +405,7 @@ export default function WaiterPersonalPage() {
                             <div className="wpp-itemName">
                               {it.name} × {it.qty}
                             </div>
-                            {it.note ? <div className="wpp-note">Note: {it.note}</div> : null}
+                            {it.note ? <div className="wpp-note">Napomena: {it.note}</div> : null}
                           </div>
                           <div>{(it.price * it.qty).toFixed(2)} KM</div>
                         </div>
@@ -420,12 +420,12 @@ export default function WaiterPersonalPage() {
 
         {/* MY ORDERS */}
         <div className="wpp-section">
-          <h2 className="wpp-h2">My Assigned Orders</h2>
+          <h2 className="wpp-h2">Moje dodijeljene narudžbe</h2>
 
           {loadingMyOrders ? (
-            <div className="wpp-subText">Loading assigned orders…</div>
+            <div className="wpp-subText">Učitavanje dodijeljenih narudžbi…</div>
           ) : myOrders.length === 0 ? (
-            <div className="wpp-subText">No assigned orders yet.</div>
+            <div className="wpp-subText">Još nema dodijeljenih narudžbi.</div>
           ) : (
             <div className="wpp-grid">
               {myOrders.map((o) => (
@@ -433,20 +433,20 @@ export default function WaiterPersonalPage() {
                   <div className="wpp-cardInner">
                     <div className="wpp-cardTop">
                       <div>
-                        <div className="wpp-cardTitle">Room {o.tableId}</div>
+                        <div className="wpp-cardTitle">Soba {o.tableId}</div>
                         <div className="wpp-meta">
-                          Claimed at {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
+                          Preuzeto u {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
                         </div>
-                        <div className="wpp-meta">Order ID: {o.id}</div>
+                        <div className="wpp-meta">ID narudžbe: {o.id}</div>
                       </div>
 
                       <div className="wpp-btnRow">
                         <button onClick={() => finishOrder(o.id)} className="wpp-btn wpp-btn--success">
-                          Completed
+                          Završeno
                         </button>
                         {o.status === "CLAIMED" && (
                           <button onClick={() => unclaimOrder(o.id)} className="wpp-btn wpp-btn--danger">
-                            Unclaim
+                            Vrati
                           </button>
                         )}
                       </div>
@@ -459,7 +459,7 @@ export default function WaiterPersonalPage() {
                             <div className="wpp-itemName">
                               {it.name} × {it.qty}
                             </div>
-                            {it.note ? <div className="wpp-note">Note: {it.note}</div> : null}
+                            {it.note ? <div className="wpp-note">Napomena: {it.note}</div> : null}
                           </div>
                           <div>{(it.price * it.qty).toFixed(2)} KM</div>
                         </div>

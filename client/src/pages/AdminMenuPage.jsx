@@ -18,7 +18,7 @@ export default function AdminMenuPage() {
     const auth = getAuth();
     if (!auth) {
       clearAuthAndGoLogin();
-      throw new Error("Not logged in");
+      throw new Error("Niste prijavljeni");
     }
 
     const headers = {
@@ -30,7 +30,7 @@ export default function AdminMenuPage() {
 
     if (r.status === 401) {
       clearAuthAndGoLogin();
-      throw new Error("Session expired. Please login again.");
+      throw new Error("Sesija je istekla. Prijavite se ponovo.");
     }
 
     return r;
@@ -68,7 +68,6 @@ export default function AdminMenuPage() {
       const data = await r.json();
       setMenu(data);
 
-      // keep selection if still exists
       if (selectedCatId) {
         const stillThere = data.some((c) => c.id === selectedCatId);
         if (!stillThere) setSelectedCatId(data[0]?.id || "");
@@ -136,7 +135,7 @@ export default function AdminMenuPage() {
   }
 
   async function deleteCategory(id) {
-    if (!confirm("Delete this category? (All its items will be deleted)")) return;
+    if (!confirm("Obrisati ovu kategoriju? (Svi artikli će biti obrisani)")) return;
 
     setErr("");
     try {
@@ -158,9 +157,9 @@ export default function AdminMenuPage() {
     const name = newItemName.trim();
     const price = Number(newItemPrice);
 
-    if (!selectedCatId) return setErr("Select a category first");
+    if (!selectedCatId) return setErr("Prvo odaberite kategoriju");
     if (!name) return;
-    if (!Number.isFinite(price) || price <= 0) return setErr("Price must be > 0");
+    if (!Number.isFinite(price) || price <= 0) return setErr("Cijena mora biti veća od 0");
 
     setErr("");
     try {
@@ -200,7 +199,7 @@ export default function AdminMenuPage() {
   }
 
   async function deleteItem(id) {
-    if (!confirm("Delete this item?")) return;
+    if (!confirm("Obrisati ovaj artikl?")) return;
 
     setErr("");
     try {
@@ -283,12 +282,12 @@ export default function AdminMenuPage() {
       <div style={header}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22 }}>Admin • Menu</h1>
-            <div style={small}>Add / edit / delete categories and items (DB-backed)</div>
+            <h1 style={{ margin: 0, fontSize: 22 }}>Admin • Meni</h1>
+            <div style={small}>Dodaj / uređuj / briši kategorije i artikle (baza podataka)</div>
           </div>
 
           <button style={btn} onClick={loadMenu}>
-            Refresh
+            Osvježi
           </button>
         </div>
 
@@ -310,25 +309,25 @@ export default function AdminMenuPage() {
       </div>
 
       {loading ? (
-        <div style={{ ...card, marginTop: 14 }}>Loading…</div>
+        <div style={{ ...card, marginTop: 14 }}>Učitavanje…</div>
       ) : (
         <div style={grid}>
           {/* LEFT: Categories */}
           <div style={card}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-              <h3 style={{ marginTop: 0, marginBottom: 8 }}>Categories</h3>
-              <div style={small}>{menu.length} total</div>
+              <h3 style={{ marginTop: 0, marginBottom: 8 }}>Kategorije</h3>
+              <div style={small}>{menu.length} ukupno</div>
             </div>
 
             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
               <input
                 style={input}
-                placeholder="New category…"
+                placeholder="Nova kategorija…"
                 value={newCat}
                 onChange={(e) => setNewCat(e.target.value)}
               />
               <button style={btn} onClick={createCategory}>
-                Add
+                Dodaj
               </button>
             </div>
 
@@ -343,20 +342,20 @@ export default function AdminMenuPage() {
                       textAlign: "left",
                       background: c.id === selectedCatId ? "#2a3650" : "#161d2a",
                     }}
-                    title="Select category"
+                    title="Odaberi kategoriju"
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                       <span style={{ fontWeight: 900 }}>{c.name}</span>
                       <span style={{ opacity: 0.85, fontWeight: 800 }}>{c.items?.length ?? 0}</span>
                     </div>
                     <div style={{ marginTop: 4, fontSize: 12, opacity: 0.75 }}>
-                      Tap to manage items
+                      Kliknite za upravljanje artiklima
                     </div>
                   </button>
 
                   <button
                     style={{ ...btnDanger, minWidth: 54 }}
-                    title="Delete category"
+                    title="Obriši kategoriju"
                     onClick={() => deleteCategory(c.id)}
                   >
                     🗑
@@ -364,7 +363,7 @@ export default function AdminMenuPage() {
                 </div>
               ))}
 
-              {menu.length === 0 && <div style={small}>No categories yet.</div>}
+              {menu.length === 0 && <div style={small}>Još nema kategorija.</div>}
             </div>
           </div>
 
@@ -372,18 +371,17 @@ export default function AdminMenuPage() {
           <div style={card}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
               <h3 style={{ marginTop: 0, marginBottom: 8 }}>
-                Items{" "}
+                Artikli{" "}
                 {selectedCat ? <span style={{ ...small, fontWeight: 700 }}>• {selectedCat.name}</span> : null}
               </h3>
 
               {selectedCat ? (
-                <span style={small}>{(selectedCat.items || []).length} items</span>
+                <span style={small}>{(selectedCat.items || []).length} artikala</span>
               ) : (
-                <span style={small}>Select a category</span>
+                <span style={small}>Odaberite kategoriju</span>
               )}
             </div>
 
-            {/* Rename + delete selected category */}
             {selectedCat ? (
               <div
                 style={{
@@ -402,12 +400,11 @@ export default function AdminMenuPage() {
                   }}
                 />
                 <button style={btnDanger} onClick={() => deleteCategory(selectedCat.id)}>
-                  Delete Category
+                  Obriši kategoriju
                 </button>
               </div>
             ) : null}
 
-            {/* Add item */}
             <div
               style={{
                 display: "grid",
@@ -418,26 +415,25 @@ export default function AdminMenuPage() {
             >
               <input
                 style={input}
-                placeholder="New item…"
+                placeholder="Novi artikl…"
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
                 disabled={!selectedCatId}
               />
               <input
                 style={input}
-                placeholder="Price"
+                placeholder="Cijena"
                 value={newItemPrice}
                 onChange={(e) => setNewItemPrice(e.target.value)}
                 disabled={!selectedCatId}
               />
               <button style={btn} onClick={createItem} disabled={!selectedCatId}>
-                Add Item
+                Dodaj artikl
               </button>
             </div>
 
-            {/* Items list */}
             {!selectedCat ? (
-              <div style={small}>Pick a category on the left.</div>
+              <div style={small}>Odaberite kategoriju lijevo.</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {(selectedCat.items || []).map((it) => (
@@ -470,11 +466,11 @@ export default function AdminMenuPage() {
                       }}
                     />
                     <button style={btnDanger} onClick={() => deleteItem(it.id)}>
-                      Delete
+                      Obriši
                     </button>
                   </div>
                 ))}
-                {(selectedCat.items || []).length === 0 && <div style={small}>No items yet.</div>}
+                {(selectedCat.items || []).length === 0 && <div style={small}>Još nema artikala.</div>}
               </div>
             )}
           </div>

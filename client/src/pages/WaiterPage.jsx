@@ -231,7 +231,7 @@ export default function WaiterPage() {
   // ---------- Actions ----------
   const claimOrder = async (orderId) => {
     setErr("");
-    if (!waiterId) return setErr("Select waiter first.");
+    if (!waiterId) return setErr("Prvo odaberite osoblje.");
 
     try {
       const res = await fetch(`${api}/orders/${orderId}/claim`, {
@@ -252,7 +252,7 @@ export default function WaiterPage() {
 
   const handleCall = async (callId) => {
     setErr("");
-    if (!waiterId) return setErr("Select waiter first.");
+    if (!waiterId) return setErr("Prvo odaberite osoblje.");
 
     try {
       const res = await fetch(`${api}/calls/${callId}/handle`, {
@@ -285,28 +285,28 @@ export default function WaiterPage() {
         <div className="wp-top">
           <div>
             <div className="wp-titleRow">
-              <h1 className="wp-title">Staff Dashboard</h1>
-              <span className="wp-pill">{soundEnabled ? "Sound ✅" : "Sound OFF"}</span>
+              <h1 className="wp-title">Kontrolna ploča osoblja</h1>
+              <span className="wp-pill">{soundEnabled ? "Zvuk ✅" : "Zvuk isključen"}</span>
             </div>
 
             <div className="wp-actions">
               <button className="wp-btn wp-btn--ghost" onClick={() => orderSoundRef.current?.play().catch(() => {})}>
-                Test sound
+                Testiraj zvuk
               </button>
               <button className="wp-btn wp-btn--primary" onClick={toggleSound}>
-                {soundEnabled ? "Disable sound" : "Enable sound"}
+                {soundEnabled ? "Isključi zvuk" : "Uključi zvuk"}
               </button>
               <button
                 className="wp-btn wp-btn--ghost"
                 onClick={() => navigate("/pick-waiter", { state: { from: "/waiter" } })}
               >
-                Open Personal Page →
+                Otvori ličnu stranicu →
               </button>
             </div>
           </div>
 
           <div className="wp-right">
-            <span className="wp-label">Staff:</span>
+            <span className="wp-label">Osoblje:</span>
             <select
               className="wp-select"
               value={selectedWaiterId}
@@ -317,7 +317,7 @@ export default function WaiterPage() {
               }}
             >
               <option value="" disabled>
-                Select staff member
+                Odaberite člana osoblja
               </option>
               {waiters.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -335,26 +335,26 @@ export default function WaiterPage() {
 
         {!hasWaiter && (
           <div className="wp-alert wp-alert--warn">
-            <div className="wp-alertTitle">Staff member not selected</div>
-            <div className="wp-alertBody">Please select a staff member to use the dashboard.</div>
+            <div className="wp-alertTitle">Osoblje nije odabrano</div>
+            <div className="wp-alertBody">Molimo odaberite člana osoblja za korištenje kontrolne ploče.</div>
           </div>
         )}
 
         {err && (
           <div className="wp-alert wp-alert--error">
-            <div className="wp-alertTitle">Error</div>
+            <div className="wp-alertTitle">Greška</div>
             <div className="wp-alertBody">{err}</div>
           </div>
         )}
 
         {/* CALLS */}
         <div className="wp-section">
-          <h2 className="wp-h2">Calls</h2>
+          <h2 className="wp-h2">Pozivi</h2>
 
           {loadingCalls ? (
-            <div className="wp-sub">Loading calls…</div>
+            <div className="wp-sub">Učitavanje poziva…</div>
           ) : calls.length === 0 ? (
-            <div className="wp-sub">No open calls.</div>
+            <div className="wp-sub">Nema otvorenih poziva.</div>
           ) : (
             <div className="wp-grid">
               {calls.map((c) => (
@@ -363,7 +363,7 @@ export default function WaiterPage() {
                     <div className="wp-cardTop">
                       <div>
                         <div className="wp-cardTitle">
-                          Room {c.tableId} — {c.type === "bill" ? "🧾 Check request" : "🔔 Assistance request"}
+                          Soba {c.tableId} — {c.type === "bill" ? "🧾 Zahtjev za račun" : "🔔 Zahtjev za pomoć"}
                         </div>
                         <div className="wp-meta">{new Date(c.createdAt).toLocaleString()}</div>
                       </div>
@@ -373,7 +373,7 @@ export default function WaiterPage() {
                         className="wp-btn wp-btn--primary"
                         disabled={!hasWaiter}
                       >
-                        Handled
+                        Obrađeno
                       </button>
                     </div>
                   </div>
@@ -385,15 +385,15 @@ export default function WaiterPage() {
 
         {/* UNCLAIMED ORDERS */}
         <div className="wp-section">
-          <h2 className="wp-h2">Unclaimed Orders</h2>
+          <h2 className="wp-h2">Neprihvaćene narudžbe</h2>
           <p className="wp-sub">
-            New orders appear here. Click <b>Claim</b> to take responsibility.
+            Nove narudžbe se pojavljuju ovdje. Kliknite <b>Preuzmi</b> da preuzmete odgovornost.
           </p>
 
           {loadingOrders ? (
-            <div className="wp-sub">Loading orders…</div>
+            <div className="wp-sub">Učitavanje narudžbi…</div>
           ) : orders.length === 0 ? (
-            <div className="wp-sub">No unclaimed orders.</div>
+            <div className="wp-sub">Nema neprihvaćenih narudžbi.</div>
           ) : (
             <div className="wp-grid">
               {orders.map((o) => (
@@ -401,9 +401,9 @@ export default function WaiterPage() {
                   <div className="wp-cardInner">
                     <div className="wp-cardTop">
                       <div>
-                        <div className="wp-cardTitle">Room {o.tableId}</div>
+                        <div className="wp-cardTitle">Soba {o.tableId}</div>
                         <div className="wp-meta">{new Date(o.createdAt).toLocaleString()}</div>
-                        <div className="wp-meta">Order ID: {o.id}</div>
+                        <div className="wp-meta">ID narudžbe: {o.id}</div>
                       </div>
 
                       <button
@@ -411,7 +411,7 @@ export default function WaiterPage() {
                         className="wp-btn wp-btn--primary"
                         disabled={!hasWaiter}
                       >
-                        Claim
+                        Preuzmi
                       </button>
                     </div>
 
@@ -422,7 +422,7 @@ export default function WaiterPage() {
                             <div className="wp-itemName">
                               {it.name} × {it.qty}
                             </div>
-                            {it.note ? <div className="wp-note">Note: {it.note}</div> : null}
+                            {it.note ? <div className="wp-note">Napomena: {it.note}</div> : null}
                           </div>
                           <div>{(it.price * it.qty).toFixed(2)} KM</div>
                         </div>
@@ -437,12 +437,12 @@ export default function WaiterPage() {
 
         {/* MY ORDERS */}
         <div className="wp-section">
-          <h2 className="wp-h2">My Orders</h2>
+          <h2 className="wp-h2">Moje narudžbe</h2>
 
           {loadingMyOrders ? (
-            <div className="wp-sub">Loading my orders…</div>
+            <div className="wp-sub">Učitavanje mojih narudžbi…</div>
           ) : myOrders.length === 0 ? (
-            <div className="wp-sub">No claimed orders yet.</div>
+            <div className="wp-sub">Još nema preuzetih narudžbi.</div>
           ) : (
             <div className="wp-grid">
               {myOrders.map((o) => (
@@ -450,21 +450,21 @@ export default function WaiterPage() {
                   <div className="wp-cardInner">
                     <div className="wp-cardTop">
                       <div>
-                        <div className="wp-cardTitle">Room {o.tableId}</div>
+                        <div className="wp-cardTitle">Soba {o.tableId}</div>
                         <div className="wp-meta">
-                          Claimed at {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
+                          Preuzeto u {o.claimedAt ? new Date(o.claimedAt).toLocaleString() : "—"}
                         </div>
-                        <div className="wp-meta">Order ID: {o.id}</div>
+                        <div className="wp-meta">ID narudžbe: {o.id}</div>
                       </div>
 
                       <div className="wp-cardBtns">
                         <button onClick={() => finishOrder(o.id)} className="wp-btn wp-btn--success">
-                          Done
+                          Završeno
                         </button>
 
                         {o.status === "CLAIMED" && (
                           <button onClick={() => unclaimOrder(o.id)} className="wp-btn wp-btn--danger">
-                            Unclaim
+                            Vrati
                           </button>
                         )}
                       </div>
@@ -477,7 +477,7 @@ export default function WaiterPage() {
                             <div className="wp-itemName">
                               {it.name} × {it.qty}
                             </div>
-                            {it.note ? <div className="wp-note">Note: {it.note}</div> : null}
+                            {it.note ? <div className="wp-note">Napomena: {it.note}</div> : null}
                           </div>
                           <div>{(it.price * it.qty).toFixed(2)} KM</div>
                         </div>

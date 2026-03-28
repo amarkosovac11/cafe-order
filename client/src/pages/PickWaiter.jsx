@@ -41,21 +41,21 @@ export default function PickWaiter() {
       <div className="pw-shell">
         <div className="pw-top">
           <div>
-            <h1 className="pw-title">Pick staff</h1>
-            <div className="pw-sub">Choose your name to open your personal page.</div>
+            <h1 className="pw-title">Odaberi osoblje</h1>
+            <div className="pw-sub">Odaberite svoje ime da otvorite svoju ličnu stranicu.</div>
           </div>
 
           <Link to={from} className="pw-back">
-            ← Back
+            ← Nazad
           </Link>
         </div>
 
-        {err && <div className="pw-alert">Error: {err}</div>}
+        {err && <div className="pw-alert">Greška: {err}</div>}
 
         {loading ? (
-          <div className="pw-loading">Loading staff</div>
+          <div className="pw-loading">Učitavanje osoblja</div>
         ) : waiters.length === 0 ? (
-          <div className="pw-empty">No active staff found.</div>
+          <div className="pw-empty">Nema aktivnog osoblja.</div>
         ) : (
           <div className="pw-grid">
             {waiters.map((w) => (

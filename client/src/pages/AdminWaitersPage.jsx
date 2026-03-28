@@ -23,7 +23,7 @@ export default function AdminWaitersPage() {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       setWaiters(await r.json());
     } catch (e) {
-      setErr(`Failed to load waiters: ${e.message}`);
+      setErr(`Greška pri učitavanju osoblja: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ export default function AdminWaitersPage() {
     e.preventDefault();
     setErr("");
 
-    if (!newName.trim()) return setErr("Name is required");
+    if (!newName.trim()) return setErr("Ime je obavezno");
 
     const r = await adminFetch(`${api}/api/admin/waiters`, {
       method: "POST",
@@ -54,7 +54,7 @@ export default function AdminWaitersPage() {
 
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
-      setErr(j.error || "Failed to create staff");
+      setErr(j.error || "Greška pri dodavanju osoblja");
       return;
     }
 
@@ -74,7 +74,7 @@ export default function AdminWaitersPage() {
 
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
-      setErr(j.error || "Failed to update staff");
+      setErr(j.error || "Greška pri ažuriranju osoblja");
       return;
     }
     load();
@@ -88,7 +88,7 @@ export default function AdminWaitersPage() {
 
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
-      setErr(j.error || "Failed to delete staff");
+      setErr(j.error || "Greška pri brisanju osoblja");
       return;
     }
     load();
@@ -105,13 +105,13 @@ export default function AdminWaitersPage() {
         borderRadius: 12,
       }}
     >
-      <h1 style={{ marginBottom: 8 }}>Admin — Hotel Staff</h1>
+      <h1 style={{ marginBottom: 8 }}>Admin — Hotelsko osoblje</h1>
 
       <form onSubmit={createWaiter} style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         <input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          placeholder="Waiter name (e.g. Adnan)"
+          placeholder="Ime osoblja (npr. Adnan)"
           style={{
             padding: 10,
             backgroundColor: "#1f2937",
@@ -133,12 +133,12 @@ export default function AdminWaitersPage() {
             fontWeight: 800,
           }}
         >
-          Add waiter
+          Dodaj osoblje
         </button>
       </form>
 
       {err && <div style={{ color: "#f87171", marginBottom: 10 }}>{err}</div>}
-      {loading && <div style={{ opacity: 0.8 }}>Loading…</div>}
+      {loading && <div style={{ opacity: 0.8 }}>Učitavanje…</div>}
 
       <div style={{ border: "1px solid #374151", borderRadius: 10, overflow: "hidden" }}>
         {waiters.map((w) => (
@@ -152,7 +152,7 @@ export default function AdminWaitersPage() {
         ))}
 
         {waiters.length === 0 && !loading && (
-          <div style={{ padding: 14, opacity: 0.7 }}>No staff yet. Add one above.</div>
+          <div style={{ padding: 14, opacity: 0.7 }}>Nema osoblja. Dodajte iznad.</div>
         )}
       </div>
     </div>
@@ -176,7 +176,9 @@ function WaiterRow({ w, onOpenPersonal, onToggle, onDelete }) {
         <div style={{ fontWeight: 800 }}>
           #{w.id} — {w.name}
         </div>
-        <div style={{ fontSize: 12, opacity: 0.75 }}>{w.isActive ? "Active" : "Inactive"}</div>
+        <div style={{ fontSize: 12, opacity: 0.75 }}>
+          {w.isActive ? "Aktivan" : "Neaktivan"}
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end", alignItems: "center" }}>
@@ -192,7 +194,7 @@ function WaiterRow({ w, onOpenPersonal, onToggle, onDelete }) {
             fontWeight: 700,
           }}
         >
-          Open Personal
+          Otvori ličnu stranicu
         </button>
 
         <button
@@ -207,7 +209,7 @@ function WaiterRow({ w, onOpenPersonal, onToggle, onDelete }) {
             fontWeight: 800,
           }}
         >
-          {w.isActive ? "Disable" : "Enable"}
+          {w.isActive ? "Onemogući" : "Omogući"}
         </button>
 
         <button
@@ -222,7 +224,7 @@ function WaiterRow({ w, onOpenPersonal, onToggle, onDelete }) {
             fontWeight: 800,
           }}
         >
-          Delete
+          Obriši
         </button>
       </div>
     </div>
