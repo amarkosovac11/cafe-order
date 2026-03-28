@@ -24,45 +24,46 @@ export default function App() {
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/menu" element={<AdminMenuPage />} />
 
-<Route
-  path="*"
-  element={
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#000",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        padding: "40px",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "56px",
-          fontWeight: "900",
-          marginBottom: "30px",
-        }}
-      >
-{/*         Kaki MMA samo bareknuckle gole šake!
+      <Route
+        path="*"
+        element={
+          <div
+            style={{
+              minHeight: "100vh",
+              backgroundColor: "#000",
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              padding: "40px",
+            }}
+          >
+            <h1
+              style={{
+                fontSize: "56px",
+                fontWeight: "900",
+                marginBottom: "30px",
+              }}
+            >
+              {/*         Kaki MMA samo bareknuckle gole šake!
  */}      </h1>
 
-      <img
-        src="/images/bg.jpg"
-        alt="MMA"
-        style={{
-          width: "80%",
-          maxWidth: "900px",
-          borderRadius: "16px",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
-        }}
+            <img
+              src="/images/bg.jpg"
+              alt="MMA"
+              style={{
+                width: "80%",
+                maxWidth: "900px",
+                borderRadius: "16px",
+                boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+                backgroundColor: "white",
+              }}
+            />
+          </div>
+        }
       />
-    </div>
-  }
-/>
     </Routes>
   );
 }
