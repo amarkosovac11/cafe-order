@@ -31,7 +31,7 @@ export default function TablesDemoPage() {
       const data = await r.json();
       setTables(data);
     } catch (e) {
-      setErr(`Failed to load tables: ${e.message}`);
+      setErr(`Failed to load rooms: ${e.message}`);
     } finally {
       setLoading(false);
     }
