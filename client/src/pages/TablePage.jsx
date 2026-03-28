@@ -10,18 +10,14 @@ export default function TablePage() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // cart: { [itemId]: { itemId, name, price, qty, note } }
   const [cart, setCart] = useState({});
   const [placing, setPlacing] = useState(false);
   const [placedMsg, setPlacedMsg] = useState("");
   const [callMsg, setCallMsg] = useState("");
 
   const [cartOpen, setCartOpen] = useState(false);
-
-  // null => categories screen, otherwise items screen for that category
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // Token (optional)
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
 
@@ -74,8 +70,7 @@ export default function TablePage() {
     setErr("");
     setCallMsg("");
 
-    //  toast instead of opening cart
-    showToast(`Added “${it.name}” `);
+    showToast(`Dodano: ${it.name}`);
 
     setCart((prev) => {
       const existing = prev[it.id];
@@ -123,7 +118,7 @@ export default function TablePage() {
     setCallMsg("");
 
     if (!hasItems) {
-      setErr("Cart is empty.");
+      setErr("Korpa je prazna.");
       return;
     }
 
@@ -150,9 +145,9 @@ export default function TablePage() {
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
       setCart({});
-      setPlacedMsg("Your room service order has been sent.");
+      setPlacedMsg("Vaša narudžba je uspješno poslana.");
       setCartOpen(false);
-      setSelectedCategory(null); // optional: back to categories
+      setSelectedCategory(null);
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -178,7 +173,7 @@ export default function TablePage() {
       const text = await res.text();
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-      setCallMsg("Your request has been sent to staff.");
+      setCallMsg("Poziv osoblju je poslan.");
     } catch (e) {
       setErr(e.message);
     }
@@ -202,292 +197,66 @@ export default function TablePage() {
       const text = await res.text();
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-      setCallMsg("Bill requested.");
+      setCallMsg("Račun je zatražen.");
     } catch (e) {
       setErr(e.message);
     }
   };
 
-  // Visual helpers (no logic change — only UI)
-  /*  const categoryIcon = (name) => {
-     const n = String(name || "").toLowerCase();
-     if (n.includes("coffee") || n.includes("hot drinks")) return "☕";
-     if (n.includes("tea")) return "🍵";
-     if (n.includes("cold")) return "🧊";
-     if (n.includes("breakfast")) return "🍳";
-     if (n.includes("sandwich")) return "🥪";
-     if (n.includes("dessert")) return "🍰";
-     if (n.includes("pizza")) return "🍕";
-     if (n.includes("pasta")) return "🍝";
-     if (n.includes("burger")) return "🍔";
-     if (n.includes("salad")) return "🥗";
-     if (n.includes("soup")) return "🥣";
-     if (n.includes("seafood")) return "🦐";
-     if (n.includes("grill") || n.includes("main")) return "🔥";
-     if (n.includes("kids")) return "🧒";
-     if (n.includes("cocktail")) return "🍸";
-     if (n.includes("beer") || n.includes("wine") || n.includes("alcohol")) return "🍷";
-     if (n.includes("side")) return "🍟";
-     if (n.includes("starter")) return "✨";
-     return "🍽️";
-   }; */
-
-  const accentFromName = (name) => {
-    // Stable-ish hash -> HSL color (visual only)
-    const str = String(name || "");
-    let h = 0;
-    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360;
-    // Keep within warm range for a premium feel
-    const hue = (h % 60) + 25; // 25..85
-    return `hsl(${hue} 70% 55%)`;
-  };
-
   return (
     <div className="tp-page">
-      <div className="tp-ambient" aria-hidden="true" />
       <div className="tp-shell">
-        {/* Header */}
+
         <div className="tp-header">
           <div>
             <div className="tp-kicker">Room Service</div>
-<h1 className="tp-h1">Room {tableId}</h1>
-<div className="tp-sub">
-  {selectedCategory ? "Choose items and add them to your order" : "Browse the menu or request hotel services"}
-</div>
+            <h1 className="tp-h1">Soba {tableId}</h1>
+            <div className="tp-sub">
+              {selectedCategory
+                ? "Odaberite artikle i dodajte ih u narudžbu"
+                : "Pregledajte meni ili zatražite uslugu"}
+            </div>
           </div>
 
           <div className="tp-headerActions">
             <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
-              <span className="tp-btnIcon" aria-hidden="true">🔔</span>
-              Call staff
+              🔔 Pozovi osoblje
             </button>
             <button onClick={requestBill} className="tp-btn tp-btn--secondary">
-              <span className="tp-btnIcon" aria-hidden="true">🧾</span>
-              Need assistance
+              🧾 Zatraži račun
             </button>
-
-            <button
-              onClick={() => setCartOpen(true)}
-              className="tp-btn tp-btn--secondary tp-cartBtn"
-            >
-              <span className="tp-btnIcon" aria-hidden="true">🛒</span>
-              Cart
-              <span className="tp-cartCount">{cartQty}</span>
+            <button onClick={() => setCartOpen(true)} className="tp-btn tp-btn--secondary">
+              🛒 Korpa ({cartQty})
             </button>
           </div>
         </div>
 
-        {toast.open && (
-          <div className="tp-toast" role="status" aria-live="polite">
-            {toast.text}
-          </div>
-        )}
+        {err && <div style={{ color: "red" }}>{err}</div>}
+        {placedMsg && <div style={{ color: "green" }}>{placedMsg}</div>}
+        {callMsg && <div style={{ color: "green" }}>{callMsg}</div>}
 
-        {/* Alerts */}
-        <div className="tp-alerts">
-          {err && (
-            <div className="tp-alert tp-alert--error">
-              <div className="tp-alertTitle">Error</div>
-              <div className="tp-alertBody">{err}</div>
-            </div>
-          )}
-          {placedMsg && (
-            <div className="tp-alert tp-alert--success">
-              <div className="tp-alertTitle">Order</div>
-              <div className="tp-alertBody">{placedMsg}</div>
-            </div>
-          )}
-          {callMsg && (
-            <div className="tp-alert tp-alert--success">
-              <div className="tp-alertTitle">Notification</div>
-              <div className="tp-alertBody">{callMsg}</div>
-            </div>
-          )}
-        </div>
-
-        {/* MAIN CARD */}
-        <div className="tp-card">
-          {selectedCategory && (
-              <button
-                className="tp-backButton"
-                onClick={() => setSelectedCategory(null)}
-              >
-                ← Back to menu
+        {!loading && !selectedCategory && (
+          <div>
+            {categories.map((cat) => (
+              <button key={cat} onClick={() => setSelectedCategory(cat)}>
+                {cat}
               </button>
-            )}
-          <div className="tp-cardHeader">
-            
-            {selectedCategory ? (
-              <>
-                <div>
-                  <div className="tp-kicker">Category</div>
-                  <h2 className="tp-h2" style={{ marginTop: 6 }}>
-                    {selectedCategory}
-                  </h2>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="tp-h2">Menu</h2>
-                <div className="tp-badge">{categories.length} total</div>
-              </>
-            )}
-          </div>
-
-          {loading && (
-            <div className="tp-loading" style={{ padding: 14 }}>
-              <div className="tp-skeletonRow" />
-              <div className="tp-skeletonRow" />
-              <div className="tp-skeletonRow" />
-            </div>
-          )}
-
-          {!loading && !selectedCategory && (
-            <div className="tp-categoriesGrid">
-              {categories.map((cat) => {
-                const count = menu.find((c) => c.name === cat)?.items?.length || 0;
-                const accent = accentFromName(cat);
-                return (
-                  <button
-                    key={cat}
-                    className="tp-categoryCard"
-                    onClick={() => setSelectedCategory(cat)}
-                    style={{ "--tp-accent": accent }}
-                  >
-                    <div className="tp-categoryTop">
-                      {/* <div className="tp-categoryIcon" aria-hidden="true">
-                        {categoryIcon(cat)}
-                      </div> */}
-                      <div className="tp-categoryArrow" aria-hidden="true">→</div>
-                    </div>
-                    <div className="tp-categoryName">{cat}</div>
-                    <div className="tp-categoryMeta">{count} items</div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {!loading && selectedCategory && (
-            <div className="tp-menuList">
-              {itemsForSelected.map((it) => (
-                <div key={it.id} className="tp-menuItem">
-                  <div className="tp-itemLeft">
-                    <div className="tp-itemName">{it.name}</div>
-                    <div className="tp-itemMeta">
-                      <span className="tp-metaPill">{selectedCategory}</span>
-                    </div>
-                  </div>
-
-                  <div className="tp-itemRight">
-                    <div className="tp-price">{it.price.toFixed(2)} KM</div>
-                    <button onClick={() => addItem(it)} className="tp-btn tp-btn--primary">
-                      <span className="tp-btnIcon" aria-hidden="true">＋</span>
-                      Add to order
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* CART DRAWER */}
-        {cartOpen && (
-          <div className="tp-drawerOverlay" onClick={() => setCartOpen(false)}>
-            <div className="tp-drawer" onClick={(e) => e.stopPropagation()}>
-              <div className="tp-drawerHeader">
-                <div>
-                  <div className="tp-kicker">Your Order</div>
-                  <h2 className="tp-h2" style={{ marginTop: 6 }}>
-                    Cart
-                  </h2>
-                </div>
-
-                <button
-                  className="tp-btn tp-btn--icon"
-                  onClick={() => setCartOpen(false)}
-                  aria-label="Close cart"
-                  title="Close"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="tp-drawerBody">
-                {!hasItems ? (
-                  <div className="tp-empty">
-                    <div className="tp-emptyTitle">No items yet</div>
-                    <div className="tp-muted">Add something from the menu.</div>
-                  </div>
-                ) : (
-                  <div className="tp-cartList">
-                    {cartItems.map((ci) => (
-                      <div key={ci.itemId} className="tp-cartItem">
-                        <div className="tp-cartTop">
-                          <div className="tp-cartName">
-                            {ci.name} <span className="tp-qty">× {ci.qty}</span>
-                          </div>
-                          <div className="tp-cartPrice">
-                            {(ci.price * ci.qty).toFixed(2)} KM
-                          </div>
-                        </div>
-
-                        <div className="tp-qtyRow">
-                          <button
-                            onClick={() => removeOne(ci.itemId)}
-                            className="tp-btn tp-btn--icon"
-                            aria-label="Decrease quantity"
-                          >
-                            −
-                          </button>
-                          <button
-                            onClick={() =>
-                              addItem({ id: ci.itemId, name: ci.name, price: ci.price })
-                            }
-                            className="tp-btn tp-btn--icon"
-                            aria-label="Increase quantity"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <div className="tp-noteBlock">
-                          <div className="tp-inputLabel">Note (optional)</div>
-                          <input
-                            value={ci.note}
-                            onChange={(e) => setNote(ci.itemId, e.target.value)}
-                            placeholder="e.g. oat milk, no sugar…"
-                            className="tp-input"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="tp-drawerFooter">
-                <div className="tp-totalRow">
-                  <div className="tp-totalLabel">Total</div>
-                  <div className="tp-totalValue">{total.toFixed(2)} KM</div>
-                </div>
-
-                <button
-                  onClick={placeOrder}
-                  disabled={placing || !hasItems}
-                  className="tp-btn tp-btn--checkout"
-                >
-                  {placing ? "Sending…" : "Finish order"}
-                </button>
-
-                <div className="tp-finePrint">Your order is sent instantly to hotel staff.</div>
-              </div>
-            </div>
+            ))}
           </div>
         )}
 
-        <div className="tp-footerHint">Tip: use Cart button to review your order.</div>
+        {!loading && selectedCategory && (
+          <div>
+            <button onClick={() => setSelectedCategory(null)}>← Nazad</button>
+
+            {itemsForSelected.map((it) => (
+              <div key={it.id}>
+                {it.name} - {it.price} KM
+                <button onClick={() => addItem(it)}>Dodaj</button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
