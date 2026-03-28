@@ -25,45 +25,46 @@ export default function App() {
       <Route path="/admin/menu" element={<AdminMenuPage />} />
 
       <Route
-        path="*"
-        element={
-          <div
-            style={{
-              minHeight: "100vh",
-              backgroundColor: "#000",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              padding: "40px",
-            }}
-          >
-            <h1
-              style={{
-                fontSize: "56px",
-                fontWeight: "900",
-                marginBottom: "30px",
-              }}
-            >
-              {/*         Kaki MMA samo bareknuckle gole šake!
- */}      </h1>
+  path="*"
+  element={
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#dddddd", // 👈 promijenjeno (nije vise crno)
+        color: "#111",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "40px",
+      }}
+    >
+      <h1
+        style={{
+          fontSize: "56px",
+          fontWeight: "900",
+          marginBottom: "30px",
+        }}
+      >
+        {/* tekst ako treba */}
+      </h1>
 
-            <img
-              src="/images/bg.jpg"
-              alt="MMA"
-              style={{
-                width: "80%",
-                maxWidth: "900px",
-                borderRadius: "16px",
-                boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
-                backgroundColor: "white",
-              }}
-            />
-          </div>
-        }
+      <img
+        src="/images/bg.jpg"
+        alt="MMA"
+        style={{
+          width: "80%",
+          maxWidth: "900px",
+          borderRadius: "16px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.15)", // 👈 mekši shadow
+          backgroundColor: "",
+          
+        }}
       />
+    </div>
+  }
+/>
     </Routes>
   );
 }
