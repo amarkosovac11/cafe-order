@@ -219,31 +219,30 @@ export default function TablePage() {
     <div className="tp-page">
       <div className="tp-ambient" aria-hidden="true" />
       <div className="tp-shell">
-        <div className="tp-header">
-          <div>
-            <div className="tp-kicker">Posluga u sobu</div>
-            <h1 className="tp-h1">Soba {tableId}</h1>
-            <div className="tp-sub">
-              {selectedCategory
-                ? "Odaberite artikle i dodajte ih u svoju narudžbu"
-                : "Pregledajte meni ili zatražite hotelske usluge"}
-            </div>
-          </div>
+        <div className="tp-header tp-header--stacked">
+  <div className="tp-headerPanel tp-headerPanel--info">
+    <div className="tp-kicker">Posluga u sobu</div>
+    <h1 className="tp-h1">Soba {tableId}</h1>
+    <div className="tp-sub">
+      {selectedCategory
+        ? "Odaberite artikle i dodajte ih u svoju narudžbu"
+        : "Pregledajte meni ili zatražite hotelske usluge"}
+    </div>
+  </div>
 
-          <div className="tp-headerActions">
-            <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
-              <span className="tp-btnIcon" aria-hidden="true">🔔</span>
-              Pozovi osoblje
-            </button>
+  <div className="tp-headerActions tp-headerActions--stacked">
+    <button onClick={callWaiter} className="tp-topAction">
+      Pozovi osoblje
+    </button>
 
-            {/* 
-            <button onClick={requestBill} className="tp-btn tp-btn--secondary">
-              <span className="tp-btnIcon" aria-hidden="true">🧾</span>
-              Zatraži pomoć
-            </button> 
-            */}
-          </div>
-        </div>
+    <button
+      onClick={() => setCartOpen(true)}
+      className="tp-topAction"
+    >
+      Korpa {cartQty > 0 ? `(${cartQty})` : ""}
+    </button>
+  </div>
+</div>
 
         {toast.open && (
           <div className="tp-toast" role="status" aria-live="polite">
