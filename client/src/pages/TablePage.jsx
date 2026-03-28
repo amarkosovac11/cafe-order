@@ -239,10 +239,10 @@ export default function TablePage() {
               <span className="tp-btnIcon" aria-hidden="true">🔔</span>
               Pozovi osoblje
             </button>
-            <button onClick={requestBill} className="tp-btn tp-btn--secondary">
+            {/* <button onClick={requestBill} className="tp-btn tp-btn--secondary">
               <span className="tp-btnIcon" aria-hidden="true">🧾</span>
               Zatraži pomoć
-            </button>
+            </button> */}
 
             <button
               onClick={() => setCartOpen(true)}
