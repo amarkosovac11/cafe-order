@@ -215,36 +215,34 @@ export default function TablePage() {
     return `hsl(${hue} 70% 55%)`;
   };
 
-  return (
-    <div className="tp-page">
-      <div className="tp-ambient" aria-hidden="true" />
-      <div className="tp-shell">
-        <div className="tp-header tp-header--stacked">
-  <div className="tp-headerPanel tp-headerPanel--info">
-   <div className="tp-header">
-  <div>
-    <div className="tp-kicker">Posluga u sobu</div>
-    <h1 className="tp-h1">Soba {tableId}</h1>
-    <div className="tp-sub">
-      {selectedCategory
-        ? "Odaberite artikle i dodajte ih u svoju narudžbu"
-        : "Pregledajte meni ili zatražite hotelske usluge"}
-    </div>
-  </div>
+ return (
+  <div className="tp-page">
+    <div className="tp-ambient" aria-hidden="true" />
+    <div className="tp-shell">
+      <div className="tp-header">
+        <div>
+          <div className="tp-kicker">Posluga u sobu</div>
+          <h1 className="tp-h1">Soba {tableId}</h1>
+          <div className="tp-sub">
+            {selectedCategory
+              ? "Odaberite artikle i dodajte ih u svoju narudžbu"
+              : "Pregledajte meni ili zatražite hotelske usluge"}
+          </div>
+        </div>
 
-  <div className="tp-headerActions tp-headerActions--vertical">
-    <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
-      Pozovi osoblje
-    </button>
+        <div className="tp-headerActions tp-headerActions--vertical">
+          <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
+            Pozovi osoblje
+          </button>
 
-    <button
-      onClick={() => setCartOpen(true)}
-      className="tp-btn tp-btn--secondary tp-cartBtn"
-    >
-      Korpa {cartQty > 0 ? `(${cartQty})` : ""}
-    </button>
-  </div>
-</div>
+          <button
+            onClick={() => setCartOpen(true)}
+            className="tp-btn tp-btn--secondary tp-cartBtn"
+          >
+            Korpa {cartQty > 0 ? `(${cartQty})` : ""}
+          </button>
+        </div>
+      </div>
 
         {toast.open && (
           <div className="tp-toast" role="status" aria-live="polite">
