@@ -51,7 +51,7 @@ export default function App() {
  */}      </h1>
 
       <img
-        src="/images/mma.jpg"
+        src="/images/bg.jpg"
         alt="MMA"
         style={{
           width: "80%",
