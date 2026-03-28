@@ -74,7 +74,6 @@ export default function TablePage() {
     setErr("");
     setCallMsg("");
 
-    //  toast instead of opening cart
     showToast(`Dodano “${it.name}”`);
 
     setCart((prev) => {
@@ -152,7 +151,7 @@ export default function TablePage() {
       setCart({});
       setPlacedMsg("Vaša narudžba za sobu je poslana.");
       setCartOpen(false);
-      setSelectedCategory(null); // optional: back to categories
+      setSelectedCategory(null);
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -209,12 +208,10 @@ export default function TablePage() {
   };
 
   const accentFromName = (name) => {
-    // Stable-ish hash -> HSL color (visual only)
     const str = String(name || "");
     let h = 0;
     for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360;
-    // Keep within warm range for a premium feel
-    const hue = (h % 60) + 25; // 25..85
+    const hue = (h % 60) + 25;
     return `hsl(${hue} 70% 55%)`;
   };
 
@@ -222,7 +219,6 @@ export default function TablePage() {
     <div className="tp-page">
       <div className="tp-ambient" aria-hidden="true" />
       <div className="tp-shell">
-        {/* Header */}
         <div className="tp-header">
           <div>
             <div className="tp-kicker">Posluga u sobu</div>
@@ -239,12 +235,13 @@ export default function TablePage() {
               <span className="tp-btnIcon" aria-hidden="true">🔔</span>
               Pozovi osoblje
             </button>
-            {/* <button onClick={requestBill} className="tp-btn tp-btn--secondary">
+
+            {/* 
+            <button onClick={requestBill} className="tp-btn tp-btn--secondary">
               <span className="tp-btnIcon" aria-hidden="true">🧾</span>
               Zatraži pomoć
-            </button> */}
-
-           
+            </button> 
+            */}
           </div>
         </div>
 
@@ -254,7 +251,6 @@ export default function TablePage() {
           </div>
         )}
 
-        {/* Alerts */}
         <div className="tp-alerts">
           {err && (
             <div className="tp-alert tp-alert--error">
@@ -276,7 +272,6 @@ export default function TablePage() {
           )}
         </div>
 
-        {/* MAIN CARD */}
         <div className="tp-card">
           {selectedCategory && (
             <button
@@ -286,16 +281,15 @@ export default function TablePage() {
               ← Nazad na meni
             </button>
           )}
+
           <div className="tp-cardHeader">
             {selectedCategory ? (
-              <>
-                <div>
-                  <div className="tp-kicker">Kategorija</div>
-                  <h2 className="tp-h2" style={{ marginTop: 6 }}>
-                    {selectedCategory}
-                  </h2>
-                </div>
-              </>
+              <div>
+                <div className="tp-kicker">Kategorija</div>
+                <h2 className="tp-h2" style={{ marginTop: 6 }}>
+                  {selectedCategory}
+                </h2>
+              </div>
             ) : (
               <>
                 <h2 className="tp-h2">Meni</h2>
@@ -317,6 +311,7 @@ export default function TablePage() {
               {categories.map((cat) => {
                 const count = menu.find((c) => c.name === cat)?.items?.length || 0;
                 const accent = accentFromName(cat);
+
                 return (
                   <button
                     key={cat}
@@ -348,7 +343,10 @@ export default function TablePage() {
 
                   <div className="tp-itemRight">
                     <div className="tp-price">{it.price.toFixed(2)} KM</div>
-                    <button onClick={() => addItem(it)} className="tp-btn tp-btn--primary">
+                    <button
+                      onClick={() => addItem(it)}
+                      className="tp-btn tp-btn--primary"
+                    >
                       <span className="tp-btnIcon" aria-hidden="true">＋</span>
                       Dodaj u narudžbu
                     </button>
@@ -359,7 +357,6 @@ export default function TablePage() {
           )}
         </div>
 
-        {/* CART DRAWER */}
         {cartOpen && (
           <div className="tp-drawerOverlay" onClick={() => setCartOpen(false)}>
             <div className="tp-drawer" onClick={(e) => e.stopPropagation()}>
@@ -408,9 +405,14 @@ export default function TablePage() {
                           >
                             −
                           </button>
+
                           <button
                             onClick={() =>
-                              addItem({ id: ci.itemId, name: ci.name, price: ci.price })
+                              addItem({
+                                id: ci.itemId,
+                                name: ci.name,
+                                price: ci.price,
+                              })
                             }
                             className="tp-btn tp-btn--icon"
                             aria-label="Povećaj količinu"
@@ -434,19 +436,6 @@ export default function TablePage() {
                 )}
               </div>
 
-{hasItems && !cartOpen && (
-  <button
-    type="button"
-    className="tp-stickyCartBar"
-    onClick={() => setCartOpen(true)}
-    aria-label="Otvori korpu"
-  >
-    <span className="tp-stickyCartCount">{cartQty}</span>
-    <span className="tp-stickyCartLabel">Vidi korpu</span>
-    <span className="tp-stickyCartPrice">{total.toFixed(2)} KM</span>
-  </button>
-)}
-              
               <div className="tp-drawerFooter">
                 <div className="tp-totalRow">
                   <div className="tp-totalLabel">Ukupno</div>
@@ -461,13 +450,30 @@ export default function TablePage() {
                   {placing ? "Slanje…" : "Završi narudžbu"}
                 </button>
 
-                <div className="tp-finePrint">Vaša narudžba se odmah šalje hotelskom osoblju.</div>
+                <div className="tp-finePrint">
+                  Vaša narudžba se odmah šalje hotelskom osoblju.
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        <div className="tp-footerHint">Savjet: koristite dugme Korpa za pregled narudžbe.</div>
+        {hasItems && !cartOpen && (
+          <button
+            type="button"
+            className="tp-stickyCartBar"
+            onClick={() => setCartOpen(true)}
+            aria-label="Otvori korpu"
+          >
+            <span className="tp-stickyCartCount">{cartQty}</span>
+            <span className="tp-stickyCartLabel">Vidi korpu</span>
+            <span className="tp-stickyCartPrice">{total.toFixed(2)} KM</span>
+          </button>
+        )}
+
+        <div className="tp-footerHint">
+          Nakon dodavanja artikla, dolje će se pojaviti pregled korpe.
+        </div>
       </div>
     </div>
   );
