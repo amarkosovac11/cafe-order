@@ -221,6 +221,8 @@ export default function TablePage() {
       <div className="tp-shell">
         <div className="tp-header tp-header--stacked">
   <div className="tp-headerPanel tp-headerPanel--info">
+    <div className="tp-header">
+  <div>
     <div className="tp-kicker">Posluga u sobu</div>
     <h1 className="tp-h1">Soba {tableId}</h1>
     <div className="tp-sub">
@@ -230,14 +232,14 @@ export default function TablePage() {
     </div>
   </div>
 
-  <div className="tp-headerActions tp-headerActions--stacked">
-    <button onClick={callWaiter} className="tp-topAction">
+  <div className="tp-headerActions tp-headerActions--vertical">
+    <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
       Pozovi osoblje
     </button>
 
     <button
       onClick={() => setCartOpen(true)}
-      className="tp-topAction"
+      className="tp-btn tp-btn--secondary tp-cartBtn"
     >
       Korpa {cartQty > 0 ? `(${cartQty})` : ""}
     </button>
