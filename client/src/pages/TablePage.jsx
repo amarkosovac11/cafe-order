@@ -225,8 +225,8 @@ export default function TablePage() {
           <h1 className="tp-h1">Soba {tableId}</h1>
           <div className="tp-sub">
             {selectedCategory
-              ? "Odaberite artikle i dodajte ih u svoju narudžbu"
-              : "Pregledajte meni ili zatražite hotelske usluge"}
+            ? "Odaberite artikle za svoju narudžbu"
+            : "Pregledajte meni i kontaktirajte osoblje po potrebi"}
           </div>
         </div>
 
@@ -269,11 +269,11 @@ export default function TablePage() {
         <div className="tp-card">
           {selectedCategory && (
             <button
-              className="tp-backButton"
-              onClick={() => setSelectedCategory(null)}
-            >
-              ← Nazad na meni
-            </button>
+  className="tp-backButton"
+  onClick={() => setSelectedCategory(null)}
+>
+  ← Nazad
+</button>
           )}
 
           <div className="tp-cardHeader">
@@ -313,9 +313,7 @@ export default function TablePage() {
                     onClick={() => setSelectedCategory(cat)}
                     style={{ "--tp-accent": accent }}
                   >
-                    <div className="tp-categoryTop">
-                      <div className="tp-categoryArrow" aria-hidden="true">→</div>
-                    </div>
+                    
                     <div className="tp-categoryName">{cat}</div>
                     <div className="tp-categoryMeta">{count} artikala</div>
                   </button>
@@ -337,13 +335,12 @@ export default function TablePage() {
 
                   <div className="tp-itemRight">
                     <div className="tp-price">{it.price.toFixed(2)} KM</div>
-                    <button
-                      onClick={() => addItem(it)}
-                      className="tp-btn tp-btn--primary"
-                    >
-                      <span className="tp-btnIcon" aria-hidden="true">＋</span>
-                      Dodaj u narudžbu
-                    </button>
+                   <button
+  onClick={() => addItem(it)}
+  className="tp-btn tp-btn--primary"
+>
+  Dodaj
+</button>
                   </div>
                 </div>
               ))}
