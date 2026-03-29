@@ -200,7 +200,7 @@ setSearchParams(params);
       const text = await res.text();
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-      setCallMsg("Hotelsko osoblje je obaviješteno i uskoro će doći do vaše sobe.");
+      setCallMsg("Hotelsko osoblje je obaviješteno i uskoro će doći do Vaše sobe.");
       setStaffPopupOpen(true);
     } catch (e) {
       setErr(e.message);
