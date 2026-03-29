@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import "../css/TablePage.css";
 
 export default function TablePage() {
   const { tableId } = useParams();
+  const navigate = useNavigate();
   const api = import.meta.env.VITE_API_URL;
 
   const [menu, setMenu] = useState([]);
@@ -18,12 +19,29 @@ export default function TablePage() {
 
   const [cartOpen, setCartOpen] = useState(false);
 
-  // null => categories screen, otherwise items screen for that category
-  const [selectedCategory, setSelectedCategory] = useState(null);
+
 
   // Token (optional)
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category");
   const token = searchParams.get("token") || "";
+
+  const openCategory = (cat) => {
+  const params = new URLSearchParams(searchParams);
+  params.set("category", cat);
+  setSearchParams(params);
+};
+
+const goBackToMenu = () => {
+  if (window.history.length > 1) {
+    navigate(-1);
+    return;
+  }
+
+  const params = new URLSearchParams(searchParams);
+  params.delete("category");
+  setSearchParams(params);
+};
 
   useEffect(() => {
     fetch(`${api}/menu`)
@@ -151,7 +169,9 @@ export default function TablePage() {
       setCart({});
       setPlacedMsg("Vaša narudžba za sobu je poslana.");
       setCartOpen(false);
-      setSelectedCategory(null);
+      const params = new URLSearchParams(searchParams);
+params.delete("category");
+setSearchParams(params);
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -270,7 +290,7 @@ export default function TablePage() {
           {selectedCategory && (
             <button
   className="tp-backButton"
-  onClick={() => setSelectedCategory(null)}
+  onClick={goBackToMenu}
 >
   ← Nazad
 </button>
@@ -310,7 +330,7 @@ export default function TablePage() {
                   <button
                     key={cat}
                     className="tp-categoryCard"
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => openCategory(cat)}
                     style={{ "--tp-accent": accent }}
                   >
                     
