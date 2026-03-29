@@ -15,6 +15,7 @@ export default function TablePage() {
   const [cart, setCart] = useState({});
   const [placing, setPlacing] = useState(false);
   const [placedMsg, setPlacedMsg] = useState("");
+  const [orderPopupOpen, setOrderPopupOpen] = useState(false);
   const [callMsg, setCallMsg] = useState("");
 
   const [cartOpen, setCartOpen] = useState(false);
@@ -167,9 +168,11 @@ const goBackToMenu = () => {
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
       setCart({});
-      setPlacedMsg("Vaša narudžba za sobu je poslana.");
-      setCartOpen(false);
-      const params = new URLSearchParams(searchParams);
+setPlacedMsg("Vaša narudžba je uspješno poslana.");
+setOrderPopupOpen(true);
+setCartOpen(false);
+
+const params = new URLSearchParams(searchParams);
 params.delete("category");
 setSearchParams(params);
     } catch (e) {
@@ -272,12 +275,7 @@ setSearchParams(params);
               <div className="tp-alertBody">{err}</div>
             </div>
           )}
-          {placedMsg && (
-            <div className="tp-alert tp-alert--success">
-              <div className="tp-alertTitle">Narudžba</div>
-              <div className="tp-alertBody">{placedMsg}</div>
-            </div>
-          )}
+          
           {callMsg && (
             <div className="tp-alert tp-alert--success">
               <div className="tp-alertTitle">Obavijest</div>
@@ -481,6 +479,29 @@ setSearchParams(params);
             <span className="tp-stickyCartPrice">{total.toFixed(2)} KM</span>
           </button>
         )}
+
+{orderPopupOpen && (
+  <div
+    className="tp-modalOverlay"
+    onClick={() => setOrderPopupOpen(false)}
+  >
+    <div
+      className="tp-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="tp-modalIcon">✓</div>
+      <h3 className="tp-modalTitle">Narudžba poslana</h3>
+      <p className="tp-modalText">{placedMsg}</p>
+
+      <button
+        className="tp-btn tp-btn--checkout"
+        onClick={() => setOrderPopupOpen(false)}
+      >
+        U redu
+      </button>
+    </div>
+  </div>
+)}
 
         <div className="tp-footerHint">
           Nakon dodavanja artikla, dolje će se pojaviti pregled korpe.
