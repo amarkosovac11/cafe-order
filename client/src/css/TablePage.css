@@ -128,7 +128,7 @@
 .tp-toast {
   position: fixed;
   left: 50%;
-  bottom: 18px;
+  bottom: 90px;
   transform: translateX(-50%);
   z-index: 9999;
 
