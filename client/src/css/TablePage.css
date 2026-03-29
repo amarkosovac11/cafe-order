@@ -34,7 +34,7 @@
   --tp-shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.22);
 
   --tp-font: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
---tp-font-title: "Cormorant Garamond", serif;
+--tp-font-title: "Manrope", "Inter", sans-serif;
 }
 
 * {
@@ -92,8 +92,8 @@
   font-family: var(--tp-font-title);
   font-size: 42px;
   line-height: 1.02;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   color: #fffaf0;
 }
 
@@ -225,7 +225,7 @@
   font-family: var(--tp-font-title);
   font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   color: #fffaf0;
 }
 
@@ -310,9 +310,9 @@
 
 .tp-categoryName {
   font-family: var(--tp-font-title);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   margin-bottom: 8px;
   color: #fffaf0;
 }
@@ -386,12 +386,13 @@
 
 .tp-itemName {
   font-family: var(--tp-font-title);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   margin-bottom: 8px;
   color: #fffaf0;
 }
+
 
 .tp-itemMeta {
   display: flex;
