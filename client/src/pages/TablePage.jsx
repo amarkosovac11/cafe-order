@@ -235,12 +235,7 @@ export default function TablePage() {
             Pozovi osoblje
           </button>
 
-          <button
-            onClick={() => setCartOpen(true)}
-            className="tp-btn tp-btn--secondary tp-cartBtn"
-          >
-            Korpa {cartQty > 0 ? `(${cartQty})` : ""}
-          </button>
+          
         </div>
       </div>
 
