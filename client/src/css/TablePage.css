@@ -34,7 +34,7 @@
   --tp-shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.22);
 
   --tp-font: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --tp-font-title: Georgia, "Times New Roman", serif;
+--tp-font-title: "Cormorant Garamond", serif;
 }
 
 * {
