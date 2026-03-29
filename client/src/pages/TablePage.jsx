@@ -15,9 +15,10 @@ export default function TablePage() {
   const [cart, setCart] = useState({});
   const [placing, setPlacing] = useState(false);
   const [placedMsg, setPlacedMsg] = useState("");
-  const [orderPopupOpen, setOrderPopupOpen] = useState(false);
-  const [staffPopupOpen, setStaffPopupOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
+const [callMsg, setCallMsg] = useState("");
+const [orderPopupOpen, setOrderPopupOpen] = useState(false);
+const [staffPopupOpen, setStaffPopupOpen] = useState(false);
+const [cartOpen, setCartOpen] = useState(false);
 
 
 
