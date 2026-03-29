@@ -16,8 +16,7 @@ export default function TablePage() {
   const [placing, setPlacing] = useState(false);
   const [placedMsg, setPlacedMsg] = useState("");
   const [orderPopupOpen, setOrderPopupOpen] = useState(false);
-  const [callMsg, setCallMsg] = useState("");
-
+  const [staffPopupOpen, setStaffPopupOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
 
@@ -200,7 +199,8 @@ setSearchParams(params);
       const text = await res.text();
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
-      setCallMsg("Vaš zahtjev je poslan osoblju.");
+      setCallMsg("Hotelsko osoblje je obaviješteno i uskoro će doći do vaše sobe.");
+      setStaffPopupOpen(true);
     } catch (e) {
       setErr(e.message);
     }
@@ -276,12 +276,7 @@ setSearchParams(params);
             </div>
           )}
           
-          {callMsg && (
-            <div className="tp-alert tp-alert--success">
-              <div className="tp-alertTitle">Obavijest</div>
-              <div className="tp-alertBody">{callMsg}</div>
-            </div>
-          )}
+          
         </div>
 
         <div className="tp-card">
@@ -496,6 +491,29 @@ setSearchParams(params);
       <button
         className="tp-btn tp-btn--checkout"
         onClick={() => setOrderPopupOpen(false)}
+      >
+        U redu
+      </button>
+    </div>
+  </div>
+)}
+
+{staffPopupOpen && (
+  <div
+    className="tp-modalOverlay"
+    onClick={() => setStaffPopupOpen(false)}
+  >
+    <div
+      className="tp-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="tp-modalIcon">✓</div>
+      <h3 className="tp-modalTitle">Osoblje je obaviješteno</h3>
+      <p className="tp-modalText">{callMsg}</p>
+
+      <button
+        className="tp-btn tp-btn--checkout"
+        onClick={() => setStaffPopupOpen(false)}
       >
         U redu
       </button>
