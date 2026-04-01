@@ -8,6 +8,7 @@ import AdminWaitersPage from "./pages/AdminWaitersPage";
 import AdminHome from "./pages/AdminHome";
 import AdminLogin from "./pages/AdminLogin";
 import AdminMenuPage from "./pages/AdminMenuPage";
+import RoomScreenPage from "./pages/RoomScreenPage";
 
 
 
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/admin/home" element={<AdminHome />} />
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/menu" element={<AdminMenuPage />} />
+      <Route path="/t/:tableId/screen" element={<RoomScreenPage />} />
 
       <Route
   path="*"
