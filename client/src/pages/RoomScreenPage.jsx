@@ -21,7 +21,9 @@ export default function RoomScreenPage() {
   // Ako koristiš već gotovu QR sliku u public folderu:
   // npr public/qr-monti-room-204.png
   // onda možeš privremeno koristiti ovo:
-  const fallbackQrImage = "/qr-placeholder.png";
+  const qrImage = tableId
+  ? `/images/table-${tableId}-Table_${tableId}.png`
+  : "/qr-placeholder.png";
 
   useEffect(() => {
     const updateSarajevoClock = () => {
@@ -178,9 +180,9 @@ export default function RoomScreenPage() {
               {/* Privremeno koristi fallbackQrImage.
                   Kasnije ovo zamijeniš pravim QR generatorom za guestUrl */}
               <img
-                src={fallbackQrImage}
-                alt={guestUrl ? `QR code for room ${tableId}` : "QR code"}
-              />
+  src={qrImage}
+  alt={`QR code for room ${tableId}`}
+/>
             </div>
 
             <h2>Scan to access services</h2>
