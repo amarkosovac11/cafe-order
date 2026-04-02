@@ -942,3 +942,59 @@
   line-height: 1.55;
   color: var(--tp-muted);
 }
+
+/* Language dropdown wrapper */
+.tp-langWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+/* Select styling */
+.tp-langSelect {
+  min-width: 180px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #2b3548;
+  background: #0c0f15;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.tp-langSelect:hover {
+  border-color: #3b82f6;
+  background: #111827;
+}
+
+/* Focus effect */
+.tp-langSelect:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Custom arrow */
+.tp-langWrapper {
+  position: relative;
+}
+
+.tp-langWrapper::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: translateY(-50%) rotate(45deg);
+  pointer-events: none;
+}

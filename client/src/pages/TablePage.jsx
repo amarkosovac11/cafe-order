@@ -270,33 +270,11 @@ export default function TablePage() {
               Pozovi osoblje
             </button>
 
-           <div
-  style={{
-    marginTop: "10px",
-    display: "flex",
-    justifyContent: "flex-end",
-  }}
->
+           <div className="tp-langWrapper">
   <select
     value={lang}
     onChange={(e) => setLang(Number(e.target.value))}
-    className="tp-btn tp-btn--secondary"
-    style={{
-      minWidth: "180px",
-      opacity: 1,
-      border: "1px solid white",
-      cursor: "pointer",
-      appearance: "none",
-      WebkitAppearance: "none",
-      MozAppearance: "none",
-      paddingRight: "36px",
-      backgroundImage:
-        'linear-gradient(45deg, transparent 50%, white 50%), linear-gradient(135deg, white 50%, transparent 50%)',
-      backgroundPosition:
-        'calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px)',
-      backgroundSize: "6px 6px, 6px 6px",
-      backgroundRepeat: "no-repeat",
-    }}
+    className="tp-langSelect"
   >
     <option value={0}>Bosnian</option>
     <option value={1}>English</option>
