@@ -44,6 +44,11 @@ export default function AdminMenuPage() {
   const [selectedCatId, setSelectedCatId] = useState("");
 
   const [newItemName, setNewItemName] = useState("");
+  const [newItemName1, setNewItemName1] = useState("");
+  const [newItemName2, setNewItemName2] = useState("");
+  const [newItemName3, setNewItemName3] = useState("");
+  const [newItemName4, setNewItemName4] = useState("");
+  const [newItemImage, setNewItemImage] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 820);
@@ -158,7 +163,7 @@ export default function AdminMenuPage() {
     const price = Number(newItemPrice);
 
     if (!selectedCatId) return setErr("Prvo odaberite kategoriju");
-    if (!name) return;
+    if (!name) return setErr("Naziv artikla je obavezan");
     if (!Number.isFinite(price) || price <= 0) return setErr("Cijena mora biti veća od 0");
 
     setErr("");
@@ -166,13 +171,27 @@ export default function AdminMenuPage() {
       const r = await authedFetch(`${api}/menu-item`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, price, categoryId: selectedCatId }),
+        body: JSON.stringify({
+          name,
+          name1: newItemName1,
+          name2: newItemName2,
+          name3: newItemName3,
+          name4: newItemName4,
+          imageUrl: newItemImage,
+          price,
+          categoryId: selectedCatId,
+        }),
       });
 
       const data = await r.json();
       if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
 
       setNewItemName("");
+      setNewItemName1("");
+      setNewItemName2("");
+      setNewItemName3("");
+      setNewItemName4("");
+      setNewItemImage("");
       setNewItemPrice("");
       await loadMenu();
     } catch (e) {
@@ -216,9 +235,8 @@ export default function AdminMenuPage() {
     }
   }
 
-  // ---------- Styles ----------
   const wrap = {
-    maxWidth: 1100,
+    maxWidth: 1280,
     margin: "24px auto",
     padding: 12,
     color: "white",
@@ -273,9 +291,16 @@ export default function AdminMenuPage() {
     background: "#0c0f15",
     color: "white",
     outline: "none",
+    boxSizing: "border-box",
   };
 
   const small = { fontSize: 12, opacity: 0.8 };
+
+  const itemEditorGrid = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
+    gap: 10,
+  };
 
   return (
     <div style={wrap}>
@@ -312,7 +337,6 @@ export default function AdminMenuPage() {
         <div style={{ ...card, marginTop: 14 }}>Učitavanje…</div>
       ) : (
         <div style={grid}>
-          {/* LEFT: Categories */}
           <div style={card}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
               <h3 style={{ marginTop: 0, marginBottom: 8 }}>Kategorije</h3>
@@ -367,7 +391,6 @@ export default function AdminMenuPage() {
             </div>
           </div>
 
-          {/* RIGHT: Items */}
           <div style={card}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
               <h3 style={{ marginTop: 0, marginBottom: 8 }}>
@@ -408,25 +431,70 @@ export default function AdminMenuPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: isMobile ? "1fr" : "1fr 160px 140px",
+                gridTemplateColumns: "1fr",
                 gap: 10,
-                marginBottom: 12,
+                marginBottom: 16,
+                padding: 12,
+                borderRadius: 14,
+                border: "1px solid #263043",
+                background: "#0d1017",
               }}
             >
+              <div style={{ fontWeight: 800 }}>Dodaj novi artikl</div>
+
+              <div style={itemEditorGrid}>
+                <input
+                  style={input}
+                  placeholder="Osnovni naziv"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  disabled={!selectedCatId}
+                />
+                <input
+                  style={input}
+                  placeholder="Cijena"
+                  value={newItemPrice}
+                  onChange={(e) => setNewItemPrice(e.target.value)}
+                  disabled={!selectedCatId}
+                />
+                <input
+                  style={input}
+                  placeholder="Naziv 1"
+                  value={newItemName1}
+                  onChange={(e) => setNewItemName1(e.target.value)}
+                  disabled={!selectedCatId}
+                />
+                <input
+                  style={input}
+                  placeholder="Naziv 2"
+                  value={newItemName2}
+                  onChange={(e) => setNewItemName2(e.target.value)}
+                  disabled={!selectedCatId}
+                />
+                <input
+                  style={input}
+                  placeholder="Naziv 3"
+                  value={newItemName3}
+                  onChange={(e) => setNewItemName3(e.target.value)}
+                  disabled={!selectedCatId}
+                />
+                <input
+                  style={input}
+                  placeholder="Naziv 4"
+                  value={newItemName4}
+                  onChange={(e) => setNewItemName4(e.target.value)}
+                  disabled={!selectedCatId}
+                />
+              </div>
+
               <input
                 style={input}
-                placeholder="Novi artikl…"
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
+                placeholder="Image URL"
+                value={newItemImage}
+                onChange={(e) => setNewItemImage(e.target.value)}
                 disabled={!selectedCatId}
               />
-              <input
-                style={input}
-                placeholder="Cijena"
-                value={newItemPrice}
-                onChange={(e) => setNewItemPrice(e.target.value)}
-                disabled={!selectedCatId}
-              />
+
               <button style={btn} onClick={createItem} disabled={!selectedCatId}>
                 Dodaj artikl
               </button>
@@ -441,30 +509,105 @@ export default function AdminMenuPage() {
                     key={it.id}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: isMobile ? "1fr" : "1fr 160px 140px",
+                      gridTemplateColumns: "1fr",
                       gap: 10,
-                      padding: 10,
+                      padding: 12,
                       borderRadius: 14,
                       border: "1px solid #263043",
                       background: "#0d1017",
                     }}
                   >
+                    <div style={{ fontWeight: 800, fontSize: 14 }}>Artikal</div>
+
+                    {it.imageUrl ? (
+                      <img
+                        src={it.imageUrl}
+                        alt={it.name}
+                        style={{
+                          width: "100%",
+                          maxWidth: 220,
+                          height: 140,
+                          objectFit: "cover",
+                          borderRadius: 12,
+                          border: "1px solid #2b3548",
+                        }}
+                      />
+                    ) : null}
+
+                    <div style={itemEditorGrid}>
+                      <input
+                        style={input}
+                        defaultValue={it.name || ""}
+                        placeholder="Osnovni naziv"
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v && v !== (it.name || "")) updateItem(it.id, { name: v });
+                        }}
+                      />
+
+                      <input
+                        style={input}
+                        defaultValue={String(it.price)}
+                        placeholder="Cijena"
+                        onBlur={(e) => {
+                          const v = Number(e.target.value);
+                          if (Number.isFinite(v) && v > 0 && v !== it.price) {
+                            updateItem(it.id, { price: v });
+                          }
+                        }}
+                      />
+
+                      <input
+                        style={input}
+                        defaultValue={it.name1 || ""}
+                        placeholder="Naziv 1"
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v !== (it.name1 || "")) updateItem(it.id, { name1: v });
+                        }}
+                      />
+
+                      <input
+                        style={input}
+                        defaultValue={it.name2 || ""}
+                        placeholder="Naziv 2"
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v !== (it.name2 || "")) updateItem(it.id, { name2: v });
+                        }}
+                      />
+
+                      <input
+                        style={input}
+                        defaultValue={it.name3 || ""}
+                        placeholder="Naziv 3"
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v !== (it.name3 || "")) updateItem(it.id, { name3: v });
+                        }}
+                      />
+
+                      <input
+                        style={input}
+                        defaultValue={it.name4 || ""}
+                        placeholder="Naziv 4"
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v !== (it.name4 || "")) updateItem(it.id, { name4: v });
+                        }}
+                      />
+                    </div>
+
                     <input
                       style={input}
-                      defaultValue={it.name}
+                      defaultValue={it.imageUrl || ""}
+                      placeholder="Image URL"
                       onBlur={(e) => {
                         const v = e.target.value.trim();
-                        if (v && v !== it.name) updateItem(it.id, { name: v });
+                        if (v !== (it.imageUrl || "")) updateItem(it.id, { imageUrl: v });
                       }}
                     />
-                    <input
-                      style={input}
-                      defaultValue={String(it.price)}
-                      onBlur={(e) => {
-                        const v = Number(e.target.value);
-                        if (Number.isFinite(v) && v > 0 && v !== it.price) updateItem(it.id, { price: v });
-                      }}
-                    />
+
                     <button style={btnDanger} onClick={() => deleteItem(it.id)}>
                       Obriši
                     </button>

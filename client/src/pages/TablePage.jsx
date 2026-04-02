@@ -15,34 +15,44 @@ export default function TablePage() {
   const [cart, setCart] = useState({});
   const [placing, setPlacing] = useState(false);
   const [placedMsg, setPlacedMsg] = useState("");
-const [callMsg, setCallMsg] = useState("");
-const [orderPopupOpen, setOrderPopupOpen] = useState(false);
-const [staffPopupOpen, setStaffPopupOpen] = useState(false);
-const [cartOpen, setCartOpen] = useState(false);
+  const [callMsg, setCallMsg] = useState("");
+  const [orderPopupOpen, setOrderPopupOpen] = useState(false);
+  const [staffPopupOpen, setStaffPopupOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
-
+  // jezik: 0 = osnovni name, 1 = name1, 2 = name2, 3 = name3, 4 = name4
+  const [lang, setLang] = useState(0);
 
   // Token (optional)
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category");
   const token = searchParams.get("token") || "";
 
+  const getItemName = (item) => {
+    if (!item) return "";
+    if (lang === 1 && item.name1) return item.name1;
+    if (lang === 2 && item.name2) return item.name2;
+    if (lang === 3 && item.name3) return item.name3;
+    if (lang === 4 && item.name4) return item.name4;
+    return item.name;
+  };
+
   const openCategory = (cat) => {
-  const params = new URLSearchParams(searchParams);
-  params.set("category", cat);
-  setSearchParams(params);
-};
+    const params = new URLSearchParams(searchParams);
+    params.set("category", cat);
+    setSearchParams(params);
+  };
 
-const goBackToMenu = () => {
-  if (window.history.length > 1) {
-    navigate(-1);
-    return;
-  }
+  const goBackToMenu = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
 
-  const params = new URLSearchParams(searchParams);
-  params.delete("category");
-  setSearchParams(params);
-};
+    const params = new URLSearchParams(searchParams);
+    params.delete("category");
+    setSearchParams(params);
+  };
 
   useEffect(() => {
     fetch(`${api}/menu`)
@@ -93,7 +103,8 @@ const goBackToMenu = () => {
     setErr("");
     setCallMsg("");
 
-    showToast(`Dodano “${it.name}”`);
+    const translatedName = getItemName(it);
+    showToast(`Dodano “${translatedName}”`);
 
     setCart((prev) => {
       const existing = prev[it.id];
@@ -102,7 +113,7 @@ const goBackToMenu = () => {
         ...prev,
         [it.id]: {
           itemId: it.id,
-          name: it.name,
+          name: translatedName,
           price: it.price,
           qty,
           note: existing?.note ?? "",
@@ -168,13 +179,13 @@ const goBackToMenu = () => {
       if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
 
       setCart({});
-setPlacedMsg("Vaša narudžba je uspješno poslana.");
-setOrderPopupOpen(true);
-setCartOpen(false);
+      setPlacedMsg("Vaša narudžba je uspješno poslana.");
+      setOrderPopupOpen(true);
+      setCartOpen(false);
 
-const params = new URLSearchParams(searchParams);
-params.delete("category");
-setSearchParams(params);
+      const params = new URLSearchParams(searchParams);
+      params.delete("category");
+      setSearchParams(params);
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -239,29 +250,88 @@ setSearchParams(params);
     return `hsl(${hue} 70% 55%)`;
   };
 
- return (
-  <div className="tp-page">
-    <div className="tp-ambient" aria-hidden="true" />
-    <div className="tp-shell">
-      <div className="tp-header">
-        <div>
-          <div className="tp-kicker">Posluga u sobu</div>
-          <h1 className="tp-h1">Soba {tableId}</h1>
-          <div className="tp-sub">
-            {selectedCategory
-            ? "Odaberite artikle za svoju narudžbu"
-            : "Pregledajte meni i kontaktirajte osoblje po potrebi"}
+  return (
+    <div className="tp-page">
+      <div className="tp-ambient" aria-hidden="true" />
+      <div className="tp-shell">
+        <div className="tp-header">
+          <div>
+            <div className="tp-kicker">Posluga u sobu</div>
+            <h1 className="tp-h1">Soba {tableId}</h1>
+            <div className="tp-sub">
+              {selectedCategory
+                ? "Odaberite artikle za svoju narudžbu"
+                : "Pregledajte meni i kontaktirajte osoblje po potrebi"}
+            </div>
+          </div>
+
+          <div className="tp-headerActions tp-headerActions--vertical">
+            <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
+              Pozovi osoblje
+            </button>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                flexWrap: "wrap",
+                marginTop: "10px",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                onClick={() => setLang(0)}
+                className="tp-btn tp-btn--secondary"
+                style={{
+                  opacity: lang === 0 ? 1 : 0.7,
+                  border: lang === 0 ? "1px solid white" : undefined,
+                }}
+              >
+                BHS
+              </button>
+              <button
+                onClick={() => setLang(1)}
+                className="tp-btn tp-btn--secondary"
+                style={{
+                  opacity: lang === 1 ? 1 : 0.7,
+                  border: lang === 1 ? "1px solid white" : undefined,
+                }}
+              >
+                L1
+              </button>
+              <button
+                onClick={() => setLang(2)}
+                className="tp-btn tp-btn--secondary"
+                style={{
+                  opacity: lang === 2 ? 1 : 0.7,
+                  border: lang === 2 ? "1px solid white" : undefined,
+                }}
+              >
+                L2
+              </button>
+              <button
+                onClick={() => setLang(3)}
+                className="tp-btn tp-btn--secondary"
+                style={{
+                  opacity: lang === 3 ? 1 : 0.7,
+                  border: lang === 3 ? "1px solid white" : undefined,
+                }}
+              >
+                L3
+              </button>
+              <button
+                onClick={() => setLang(4)}
+                className="tp-btn tp-btn--secondary"
+                style={{
+                  opacity: lang === 4 ? 1 : 0.7,
+                  border: lang === 4 ? "1px solid white" : undefined,
+                }}
+              >
+                L4
+              </button>
+            </div>
           </div>
         </div>
-
-        <div className="tp-headerActions tp-headerActions--vertical">
-          <button onClick={callWaiter} className="tp-btn tp-btn--secondary">
-            Pozovi osoblje
-          </button>
-
-          
-        </div>
-      </div>
 
         {toast.open && (
           <div className="tp-toast" role="status" aria-live="polite">
@@ -276,18 +346,13 @@ setSearchParams(params);
               <div className="tp-alertBody">{err}</div>
             </div>
           )}
-          
-          
         </div>
 
         <div className="tp-card">
           {selectedCategory && (
-            <button
-  className="tp-backButton"
-  onClick={goBackToMenu}
->
-  ← Nazad
-</button>
+            <button className="tp-backButton" onClick={goBackToMenu}>
+              ← Nazad
+            </button>
           )}
 
           <div className="tp-cardHeader">
@@ -327,7 +392,6 @@ setSearchParams(params);
                     onClick={() => openCategory(cat)}
                     style={{ "--tp-accent": accent }}
                   >
-                    
                     <div className="tp-categoryName">{cat}</div>
                     <div className="tp-categoryMeta">{count} artikala</div>
                   </button>
@@ -341,7 +405,7 @@ setSearchParams(params);
               {itemsForSelected.map((it) => (
                 <div key={it.id} className="tp-menuItem">
                   <div className="tp-itemLeft">
-                    <div className="tp-itemName">{it.name}</div>
+                    <div className="tp-itemName">{getItemName(it)}</div>
                     <div className="tp-itemMeta">
                       <span className="tp-metaPill">{selectedCategory}</span>
                     </div>
@@ -349,12 +413,12 @@ setSearchParams(params);
 
                   <div className="tp-itemRight">
                     <div className="tp-price">{it.price.toFixed(2)} KM</div>
-                   <button
-  onClick={() => addItem(it)}
-  className="tp-btn tp-btn--primary"
->
-  Dodaj
-</button>
+                    <button
+                      onClick={() => addItem(it)}
+                      className="tp-btn tp-btn--primary"
+                    >
+                      Dodaj
+                    </button>
                   </div>
                 </div>
               ))}
@@ -476,51 +540,51 @@ setSearchParams(params);
           </button>
         )}
 
-{orderPopupOpen && (
-  <div
-    className="tp-modalOverlay"
-    onClick={() => setOrderPopupOpen(false)}
-  >
-    <div
-      className="tp-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="tp-modalIcon">✓</div>
-      <h3 className="tp-modalTitle">Narudžba poslana</h3>
-      <p className="tp-modalText">{placedMsg}</p>
+        {orderPopupOpen && (
+          <div
+            className="tp-modalOverlay"
+            onClick={() => setOrderPopupOpen(false)}
+          >
+            <div
+              className="tp-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="tp-modalIcon">✓</div>
+              <h3 className="tp-modalTitle">Narudžba poslana</h3>
+              <p className="tp-modalText">{placedMsg}</p>
 
-      <button
-        className="tp-btn tp-btn--checkout"
-        onClick={() => setOrderPopupOpen(false)}
-      >
-        U redu
-      </button>
-    </div>
-  </div>
-)}
+              <button
+                className="tp-btn tp-btn--checkout"
+                onClick={() => setOrderPopupOpen(false)}
+              >
+                U redu
+              </button>
+            </div>
+          </div>
+        )}
 
-{staffPopupOpen && (
-  <div
-    className="tp-modalOverlay"
-    onClick={() => setStaffPopupOpen(false)}
-  >
-    <div
-      className="tp-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="tp-modalIcon">✓</div>
-      <h3 className="tp-modalTitle">Osoblje je obaviješteno</h3>
-      <p className="tp-modalText">{callMsg}</p>
+        {staffPopupOpen && (
+          <div
+            className="tp-modalOverlay"
+            onClick={() => setStaffPopupOpen(false)}
+          >
+            <div
+              className="tp-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="tp-modalIcon">✓</div>
+              <h3 className="tp-modalTitle">Osoblje je obaviješteno</h3>
+              <p className="tp-modalText">{callMsg}</p>
 
-      <button
-        className="tp-btn tp-btn--checkout"
-        onClick={() => setStaffPopupOpen(false)}
-      >
-        U redu
-      </button>
-    </div>
-  </div>
-)}
+              <button
+                className="tp-btn tp-btn--checkout"
+                onClick={() => setStaffPopupOpen(false)}
+              >
+                U redu
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="tp-footerHint">
           Nakon dodavanja artikla, dolje će se pojaviti pregled korpe.
