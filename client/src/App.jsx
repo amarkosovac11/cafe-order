@@ -9,7 +9,7 @@ import AdminHome from "./pages/AdminHome";
 import AdminLogin from "./pages/AdminLogin";
 import AdminMenuPage from "./pages/AdminMenuPage";
 import RoomScreenPage from "./pages/RoomScreenPage";
-
+import MassageTherapistDashboard from "./pages/MassageTherapistDashboard";
 
 
 export default function App() {
@@ -25,6 +25,7 @@ export default function App() {
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/menu" element={<AdminMenuPage />} />
       <Route path="/t/:tableId/screen" element={<RoomScreenPage />} />
+      <Route path="/massage-dashboard" element={<MassageTherapistDashboard />} />
 
       <Route
   path="*"
