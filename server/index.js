@@ -190,6 +190,12 @@ app.delete("/menu-category/:id", requireAdmin, async (req, res) => {
 app.post("/menu-item", requireAdmin, async (req, res) => {
   try {
     const name = String(req.body?.name || "").trim();
+    const name1 = req.body?.name1 !== undefined ? String(req.body.name1).trim() : null;
+    const name2 = req.body?.name2 !== undefined ? String(req.body.name2).trim() : null;
+    const name3 = req.body?.name3 !== undefined ? String(req.body.name3).trim() : null;
+    const name4 = req.body?.name4 !== undefined ? String(req.body.name4).trim() : null;
+    const imageUrl = req.body?.imageUrl !== undefined ? String(req.body.imageUrl).trim() : null;
+
     const categoryId = String(req.body?.categoryId || "").trim();
     const priceRaw = req.body?.price;
 
@@ -205,7 +211,16 @@ app.post("/menu-item", requireAdmin, async (req, res) => {
     if (!cat) return res.status(404).json({ error: "Category not found" });
 
     const created = await prisma.menuItem.create({
-      data: { name, price, categoryId },
+      data: {
+        name,
+        name1,
+        name2,
+        name3,
+        name4,
+        imageUrl,
+        price,
+        categoryId,
+      },
     });
 
     res.status(201).json(created);
@@ -216,10 +231,18 @@ app.post("/menu-item", requireAdmin, async (req, res) => {
 });
 
 // ✅ Update Menu Item
+// ✅ Update Menu Item
 app.put("/menu-item/:id", requireAdmin, async (req, res) => {
   try {
     const id = String(req.params.id);
+
     const name = req.body?.name !== undefined ? String(req.body.name).trim() : undefined;
+    const name1 = req.body?.name1 !== undefined ? String(req.body.name1).trim() : undefined;
+    const name2 = req.body?.name2 !== undefined ? String(req.body.name2).trim() : undefined;
+    const name3 = req.body?.name3 !== undefined ? String(req.body.name3).trim() : undefined;
+    const name4 = req.body?.name4 !== undefined ? String(req.body.name4).trim() : undefined;
+    const imageUrl = req.body?.imageUrl !== undefined ? String(req.body.imageUrl).trim() : undefined;
+
     const price = req.body?.price !== undefined ? Number(req.body.price) : undefined;
     const categoryId =
       req.body?.categoryId !== undefined ? String(req.body.categoryId).trim() : undefined;
@@ -230,6 +253,12 @@ app.put("/menu-item/:id", requireAdmin, async (req, res) => {
       if (!name) return res.status(400).json({ error: "Name cannot be empty" });
       data.name = name;
     }
+
+    if (name1 !== undefined) data.name1 = name1 || null;
+    if (name2 !== undefined) data.name2 = name2 || null;
+    if (name3 !== undefined) data.name3 = name3 || null;
+    if (name4 !== undefined) data.name4 = name4 || null;
+    if (imageUrl !== undefined) data.imageUrl = imageUrl || null;
 
     if (price !== undefined) {
       if (!Number.isFinite(price) || price <= 0) {

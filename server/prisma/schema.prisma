@@ -16,6 +16,11 @@ model MenuCategory {
 model MenuItem {
   id         String       @id @default(cuid())
   name       String
+  name1      String?
+  name2      String?
+  name3      String?
+  name4      String?
+  imageUrl   String?
   price      Float
   categoryId String
   category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
