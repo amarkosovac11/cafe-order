@@ -453,9 +453,6 @@ export default function AdminMenuPage() {
         >
           <div>
             <h1 style={{ margin: 0, fontSize: 24 }}>Admin • Meni</h1>
-            <div style={small}>
-              Jasno odvojeno: kategorije lijevo, dodavanje novog artikla gore, uređivanje postojećih artikala dole.
-            </div>
           </div>
 
           <button style={btnMuted} onClick={loadMenu}>
