@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import "./MassageTherapistDashboard.css";
+import "../css/MassageTherapistDashboard.css";
 import {
   CalendarDays,
   Clock3,
