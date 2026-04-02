@@ -68,7 +68,7 @@ export default function AdminHome() {
           </Link>
 
 
-          <Link to="/massage-therapist" className="adminHomeCard">
+          <Link to="/massage-dashboard" className="adminHomeCard">
   <div className="adminHomeCardTop">
     <span className="adminHomeIcon">💆</span>
     <span className="adminHomeCardTitle">Dashboard za maserku</span>
