@@ -66,6 +66,18 @@ export default function AdminHome() {
               Uredite kategorije, stavke menija i dostupnost.
             </div>
           </Link>
+
+
+          <Link to="/massage-therapist" className="adminHomeCard">
+  <div className="adminHomeCardTop">
+    <span className="adminHomeIcon">💆</span>
+    <span className="adminHomeCardTitle">Dashboard za maserku</span>
+  </div>
+  <div className="adminHomeCardDesc">
+    Pregled termina, zahtjeva gostiju i dostupnih slotova za masaže.
+  </div>
+</Link>
+
         </div>
       </div>
     </div>
