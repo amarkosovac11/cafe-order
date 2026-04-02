@@ -270,66 +270,41 @@ export default function TablePage() {
               Pozovi osoblje
             </button>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "8px",
-                flexWrap: "wrap",
-                marginTop: "10px",
-                justifyContent: "flex-end",
-              }}
-            >
-              <button
-                onClick={() => setLang(0)}
-                className="tp-btn tp-btn--secondary"
-                style={{
-                  opacity: lang === 0 ? 1 : 0.7,
-                  border: lang === 0 ? "1px solid white" : undefined,
-                }}
-              >
-                BHS
-              </button>
-              <button
-                onClick={() => setLang(1)}
-                className="tp-btn tp-btn--secondary"
-                style={{
-                  opacity: lang === 1 ? 1 : 0.7,
-                  border: lang === 1 ? "1px solid white" : undefined,
-                }}
-              >
-                L1
-              </button>
-              <button
-                onClick={() => setLang(2)}
-                className="tp-btn tp-btn--secondary"
-                style={{
-                  opacity: lang === 2 ? 1 : 0.7,
-                  border: lang === 2 ? "1px solid white" : undefined,
-                }}
-              >
-                L2
-              </button>
-              <button
-                onClick={() => setLang(3)}
-                className="tp-btn tp-btn--secondary"
-                style={{
-                  opacity: lang === 3 ? 1 : 0.7,
-                  border: lang === 3 ? "1px solid white" : undefined,
-                }}
-              >
-                L3
-              </button>
-              <button
-                onClick={() => setLang(4)}
-                className="tp-btn tp-btn--secondary"
-                style={{
-                  opacity: lang === 4 ? 1 : 0.7,
-                  border: lang === 4 ? "1px solid white" : undefined,
-                }}
-              >
-                L4
-              </button>
-            </div>
+           <div
+  style={{
+    marginTop: "10px",
+    display: "flex",
+    justifyContent: "flex-end",
+  }}
+>
+  <select
+    value={lang}
+    onChange={(e) => setLang(Number(e.target.value))}
+    className="tp-btn tp-btn--secondary"
+    style={{
+      minWidth: "180px",
+      opacity: 1,
+      border: "1px solid white",
+      cursor: "pointer",
+      appearance: "none",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      paddingRight: "36px",
+      backgroundImage:
+        'linear-gradient(45deg, transparent 50%, white 50%), linear-gradient(135deg, white 50%, transparent 50%)',
+      backgroundPosition:
+        'calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px)',
+      backgroundSize: "6px 6px, 6px 6px",
+      backgroundRepeat: "no-repeat",
+    }}
+  >
+    <option value={0}>Bosnian</option>
+    <option value={1}>English</option>
+    <option value={2}>German</option>
+    <option value={3}>Arabic</option>
+    <option value={4}>French</option>
+  </select>
+</div>
           </div>
         </div>
 
