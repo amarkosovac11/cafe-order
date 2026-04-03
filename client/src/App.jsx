@@ -17,7 +17,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/t/:tableId" element={<RoomLanguagePage />} />
-      <Route path="/t/:tableId/home" element={<TablePage />} />
+      <Route path="/t/:tableId/menu" element={<TablePage />} />
       <Route path="/waiter" element={<WaiterPage />} />
       <Route path="/admin/tables" element={<TablesDemoPage />} />
       <Route path="/w/:waiterId" element={<WaiterPersonalPage />} />
