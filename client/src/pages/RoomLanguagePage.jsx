@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import "../css/RoomLanguagePage.css";
-
-const languages = [
-  { code: "bs", label: "Bosanski", flag: "🇧🇦" },
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "de", label: "Deutsch", flag: "🇩🇪" },
-];
+import "../css/RoomChoicePage.css";
 
 export default function RoomLanguagePage() {
   const navigate = useNavigate();
@@ -14,43 +8,60 @@ export default function RoomLanguagePage() {
   const [searchParams] = useSearchParams();
 
   const token = searchParams.get("token") || "";
-  const [selectedLang, setSelectedLang] = useState("bs");
+  const initialLang = searchParams.get("lang") || "bs";
+  const [selectedLang, setSelectedLang] = useState(initialLang);
 
-  const handleContinue = () => {
+  const goToMenu = () => {
     navigate(`/t/${tableId}/menu?token=${token}&lang=${selectedLang}`);
   };
 
+  const goToServices = () => {
+    navigate(`/t/${tableId}/services?token=${token}&lang=${selectedLang}`);
+  };
+
   return (
-    <div className="langPage">
-      <div className="langBgGlow langBgGlow1"></div>
-      <div className="langBgGlow langBgGlow2"></div>
+    <div className="choicePage">
+      <div className="choiceBgGlow choiceBgGlow1"></div>
+      <div className="choiceBgGlow choiceBgGlow2"></div>
 
-      <div className="langCard">
-        <div className="langTop">
-          <p className="langEyebrow">WELCOME</p>
-          <h1 className="langTitle">Soba {tableId}</h1>
-          <p className="langSubtitle">
-            Odaberite jezik za nastavak.
-          </p>
-        </div>
+      <div className="choiceCard">
+        <div className="choiceTopRow">
+          <div className="choiceTopText">
+            <p className="choiceEyebrow">WELCOME</p>
+            <h1 className="choiceTitle">Soba {tableId}</h1>
+            <p className="choiceSubtitle">
+              Odaberite željenu opciju za nastavak.
+            </p>
+          </div>
 
-        <div className="langOptions">
-          {languages.map((lang) => (
-            <button
-              key={lang.code}
-              type="button"
-              className={`langOption ${selectedLang === lang.code ? "active" : ""}`}
-              onClick={() => setSelectedLang(lang.code)}
+          <div className="choiceLangWrap">
+            <select
+              className="choiceLangSelect"
+              value={selectedLang}
+              onChange={(e) => setSelectedLang(e.target.value)}
             >
-              <span className="langFlag">{lang.flag}</span>
-              <span className="langName">{lang.label}</span>
-            </button>
-          ))}
+              <option value="bs">Bosnian</option>
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </div>
         </div>
 
-        <button className="langContinueBtn" onClick={handleContinue}>
-          Nastavi
-        </button>
+        <div className="choiceGrid">
+          <button type="button" className="choiceOption" onClick={goToMenu}>
+            <span className="choiceOptionLabel">Meni</span>
+            <span className="choiceOptionText">
+              Pregled hrane, pića i room service ponude.
+            </span>
+          </button>
+
+          <button type="button" className="choiceOption" onClick={goToServices}>
+            <span className="choiceOptionLabel">Hotelske usluge</span>
+            <span className="choiceOptionText">
+              Masaže, quad, wellness i ostale dodatne usluge.
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );
