@@ -10,12 +10,14 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminMenuPage from "./pages/AdminMenuPage";
 import RoomScreenPage from "./pages/RoomScreenPage";
 import MassageTherapistDashboard from "./pages/MassageTherapistDashboard";
+import RoomLanguagePage from "./pages/RoomLanguagePage";
 
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/t/:tableId" element={<TablePage />} />
+      <Route path="/t/:tableId" element={<RoomLanguagePage />} />
+      <Route path="/t/:tableId/home" element={<TablePage />} />
       <Route path="/waiter" element={<WaiterPage />} />
       <Route path="/admin/tables" element={<TablesDemoPage />} />
       <Route path="/w/:waiterId" element={<WaiterPersonalPage />} />

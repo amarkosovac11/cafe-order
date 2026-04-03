@@ -1,0 +1,254 @@
+:root {
+  --bg-main: #060b14;
+  --bg-card: rgba(16, 22, 34, 0.72);
+  --stroke: rgba(255, 255, 255, 0.08);
+  --stroke-strong: rgba(255, 255, 255, 0.14);
+  --text-main: #f8fafc;
+  --text-soft: rgba(255, 255, 255, 0.72);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --accent: #d4a63a;
+  --accent-soft: rgba(212, 166, 58, 0.16);
+  --shadow-main: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.roomLangPage {
+  min-height: 100vh;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(212, 166, 58, 0.08), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.08), transparent 25%),
+    linear-gradient(180deg, #04070d 0%, #08101d 100%);
+  color: var(--text-main);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.roomLangGlow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(90px);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.roomLangGlow1 {
+  width: 260px;
+  height: 260px;
+  background: rgba(212, 166, 58, 0.12);
+  top: 8%;
+  left: 10%;
+}
+
+.roomLangGlow2 {
+  width: 300px;
+  height: 300px;
+  background: rgba(37, 99, 235, 0.12);
+  right: 8%;
+  bottom: 8%;
+}
+
+.roomLangCard {
+  width: 100%;
+  max-width: 980px;
+  border: 1px solid var(--stroke);
+  background: var(--bg-card);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 28px;
+  box-shadow: var(--shadow-main);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.roomLangTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 34px 34px 24px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.roomLangEyebrow {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+}
+
+.roomLangTitle {
+  margin: 0;
+  font-size: clamp(40px, 5vw, 62px);
+  line-height: 0.96;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.roomLangSubtitle {
+  margin: 14px 0 0;
+  max-width: 620px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+.roomLangBadge {
+  flex-shrink: 0;
+  padding: 12px 18px;
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.roomLangSection {
+  padding: 28px 34px 12px;
+}
+
+.roomLangSectionTitle {
+  margin: 0 0 18px;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.roomLangGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.roomLangOption {
+  min-height: 150px;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid var(--stroke);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.roomLangOption:hover {
+  transform: translateY(-3px);
+  border-color: var(--stroke-strong);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+}
+
+.roomLangOption.active {
+  border-color: rgba(212, 166, 58, 0.55);
+  background:
+    linear-gradient(180deg, rgba(212, 166, 58, 0.14), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 0 0 1px rgba(212, 166, 58, 0.18);
+}
+
+.roomLangOptionTop {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.roomLangOptionBottom {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.roomLangBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 34px 34px;
+}
+
+.roomLangHint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+.roomLangContinueBtn {
+  border: 1px solid rgba(212, 166, 58, 0.35);
+  background: linear-gradient(180deg, #d4a63a 0%, #b9891e 100%);
+  color: #111827;
+  border-radius: 16px;
+  padding: 16px 26px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  box-shadow: 0 10px 30px rgba(212, 166, 58, 0.2);
+}
+
+.roomLangContinueBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(212, 166, 58, 0.24);
+}
+
+@media (max-width: 900px) {
+  .roomLangTop,
+  .roomLangBottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .roomLangGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .roomLangContinueBtn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .roomLangPage {
+    padding: 18px;
+  }
+
+  .roomLangTop,
+  .roomLangSection,
+  .roomLangBottom {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .roomLangSectionTitle {
+    font-size: 24px;
+  }
+
+  .roomLangOptionTop {
+    font-size: 24px;
+  }
+
+  .roomLangSubtitle {
+    font-size: 16px;
+  }
+}
