@@ -11,6 +11,7 @@ import AdminMenuPage from "./pages/AdminMenuPage";
 import RoomScreenPage from "./pages/RoomScreenPage";
 import MassageTherapistDashboard from "./pages/MassageTherapistDashboard";
 import RoomLanguagePage from "./pages/RoomLanguagePage";
+import HotelServicesPage from "./pages/HotelServicesPage";
 
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
       <Route path="/admin/menu" element={<AdminMenuPage />} />
       <Route path="/t/:tableId/screen" element={<RoomScreenPage />} />
       <Route path="/massage-dashboard" element={<MassageTherapistDashboard />} />
+      <Route path="/t/:tableId/services" element={<HotelServicesPage />} />
 
       <Route
   path="*"
